@@ -28,14 +28,23 @@ It provides a user interface to view, filter, and visualize log entries collecte
 ## Folder Structure
 
 frontend/
+
 ├── src/ # React application source code
+
 │ ├── components/ # Reusable UI components
+
 │ ├── pages/ # Pages / views
+
 │ ├── services/ # API service calls
+
 │ └── App.tsx # Root component
+
 ├── public/ # Static assets
+
 ├── package.json
+
 ├── tsconfig.json
+
 └── README.md
 
 ---
@@ -64,3 +73,4 @@ The app will run on `http://localhost:3000` and connect ot the backend API.
 - Can be containerized with Docker for local or production deployment
 - Integrates with the Log Service backend via REST APIs
 - Future improvements: charts, metrics visualization, and alert notifications
+
