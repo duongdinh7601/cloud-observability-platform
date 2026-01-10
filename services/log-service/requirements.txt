@@ -1,0 +1,8 @@
+fastapi==0.109.0
+uvicorn[standard]==0.23.0
+sqlalchemy==2.0.20
+psycopg2-binary==2.9.7
+pydantic==2.2.1
+python-dotenv==1.0.1
+httpx==1.7.7  # Optional, for service-to-service calls
+pytest==7.4.2  # Optional, for testing
