@@ -42,3 +42,5 @@ The Log Service is the first backend service in the Cloud Observability Platform
   "service_name": "frontend",
   "message": "Failed to fetch logs"
 }
+'''
+**Response:**
