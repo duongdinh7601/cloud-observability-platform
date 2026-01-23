@@ -1,7 +1,9 @@
 # Log Service
 
-The Log Service is a **backend service** in the Cloud Observability Platform.  
-It handles ingestion, storage, and retrieval of log entries for the platform. This service provides the API endpoints that the frontend dashboard consumes.
+The Log Service is a **backend microservice** in the Cloud Observability Platform.  
+It is responsible for ingesting, storing, and retrieving application logs in a scalable and production-oriented way.
+
+This service exposes a REST API consumed by the frontend dashboard and is designed to be modular, independently deployable, and horizontally scalable.
 
 ---
 
@@ -9,45 +11,69 @@ It handles ingestion, storage, and retrieval of log entries for the platform. Th
 
 - Accept log entries via HTTP (`POST /logs`)  
 - Store logs in PostgreSQL  
-- Provide filtered and paginated access to logs (`GET /logs`)  
-- Serve as a modular, independently deployable service  
+- Provide **filtered and cursor-paginated** access to logs (`GET /logs`)  
+- Enforce input validation and API contracts
+- Serve as a standalone microservice suitable for containerized deployment 
 
 ---
 
 ## Tech Stack
 
-- **Python + FastAPI** for the API backend  
-- **PostgreSQL** for persistent log storage  
-- **Uvicorn** as ASGI server  
-- **Docker** for containerization (optional)  
+- **Python + FastAPI** - API backend
+- **Pydantic v2** - request/response validation
+- **SQLAlchemy** - ORM  
+- **PostgreSQL** - persistent log storage
+- **psycopg** - Postgres driver
+- **pytest** - integration testing
+- **Uvicorn** - ASGI server  
+- **Docker** - containerization  
+
+---
+
+## Key Features
+
+**Cursor-Based Pagination**
+- Pagination uses a cursor composed of `(timestamp, id)`
+- Prevents performance issues and inconsistencies caused by offset-based pagination
+- Ensures:
+  - no duplicate results
+  - stable ordering under concurrent writes
+ 
+**Filtering**
+- Filter logs by:
+  - log level
+  - service name (case-insensitive)
+  - time range(`start_time`, `end_time`)
+- Input validation handled via FastAPI dependencies
+
+**Testing**
+- Integration tests using **pytest**
+- Separate **PostgreSQL test database**
+- FastAPI dependency overrides for clean test isolation
+- Deterministic, repeatable test runs
 
 ---
 
 ## Folder Structure
 
 log-service/
-
-├── app/ # Application source code
-
-│ ├── main.py # Entry point for FastAPI
-
-│ ├── models.py # Database models (SQLAlchemy / Pydantic)
-
-│ ├── routes.py # API routes
-
-│ ├── schemas.py # Pydantic request/response schemas
-
-│ ├── services.py # Business logic and DB interactions
-
-│ └── utils.py # Utility functions (optional)
-
-├── tests/ # Unit and integration tests
-
-├── requirements.txt # Python dependencies
-
-├── Dockerfile # Docker container configuration
-
+```graphql
+├── app/
+│   ├── main.py          # FastAPI application entry point
+│   ├── database.py      # SQLAlchemy engine + session
+│   ├── models.py        # ORM models
+│   ├── routes.py        # API routes
+│   ├── schemas.py       # Pydantic schemas
+│   └── dependencies.py  # Request parsing & validation dependencies
+│
+├── tests/
+│   └── test_logs.py     # Integration tests
+│
+├── requirements.txt     # Python dependencies
+├── .env                 # Local environment variables (gitignored)
+├── Dockerfile           # Container build (Phase 3)
 └── README.md
+```
 
 --- 
 
@@ -57,18 +83,24 @@ log-service/
 ```bash
 cd services/log-service
 ```
-2. Create a virtual environment (recommended):
+2. Create and activate a virtual environment:
 ```bash
 python -m venv venv
-source venv/bin/activate # Windows: venv\Scripts\activate
+
+# Linux / macOS
+source venv/bin/activate
+
+# Windows
+venv\Scripts\activate
 ```
 3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
-4. Set environment variables (example `.env` file):
+4. Configure environment variables:
 ```bash
-DATABASE_URL=postgresql://user:password@localhost:5432/logs_db
+DATABASE_URL=postgresql+psycopg://log_user:password@localhost:5432/log_service_db
+TEST_DATABASE_URL=postgresql+psycopg://log_user:password@localhost:5432/log_service_test_db
 ```
 5. Start the service locally:
 ```bash
@@ -81,14 +113,37 @@ The service will run on `http://localhost:8001` (or your chosen port)
 ## API Endpoints
 
 - `POST /logs` -> Create a new log entry
-- `GET /logs` -> Retrieve logs with optional filters and pagination
+- `GET /logs`
+  - Retrieve logs with:
+    - cursor-based pagination
+    - optional filters
+    - stable ordering (newest first)
+  - Response includes:
+    - `items`: list of log entries
+    - `next_cursor`: cursor for fetching the next page
 
 For full API documentation, see `docs/log-service.md`
 
 ---
 
+## Testing
+
+Run integration tests:
+```bash
+pytest
+```
+
+Tests:
+- use a dedicated test database
+- override database dependencies
+- validate cursor pagination behavior end-to-end
+
+---
+
 ## Notes
 
-- This service is **modular** and can be scaled independently
-- Designed for **containerization and Kubernetes deployment**
-- Includes **unit tests and integration tests** for future CI/CD integration
+- The service is stateless and safe to scale horizontally
+- Database access is abstracted via dependency injection
+- Pagination strategy matches real-world production systems
+- Environment-based configuration enables Docker and CI/CD workflows
+
