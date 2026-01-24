@@ -1,15 +1,14 @@
-import { Card, CardContent } from "@/components/ui/card"
+import { fetchLogs } from "@/lib/api/logs"
 
-export default function LogsPage() {
+export default async function LogsPage() {
+  const data = await fetchLogs({ limit: 10 })
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold">Logs</h1>
-
-      <Card>
-        <CardContent className="p-4">
-          Logs dashboard coming soon.
-        </CardContent>
-      </Card>
+      <div className="text-sm text-muted-foreground">
+        Loaded {data.items.length} logs
+      </div>
     </div>
   )
 }
