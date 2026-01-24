@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 
 export default function Home() {
   return (
@@ -12,9 +14,19 @@ export default function Home() {
           height={20}
           priority
         />
-        <div className="p-4 bg-red-500 text-white">
+
+        {/* test */}
+        <div className="p-4 bg-red-500 text-white"> 
           Tailwind test
         </div>
+
+        <Card>
+          <CardContent className="p-4">
+            <Button>shadcn works</Button>
+          </CardContent>
+        </Card>
+        {/* test */}
+
         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
             To get started, edit the page.tsx file.
