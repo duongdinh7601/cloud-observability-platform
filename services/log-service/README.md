@@ -106,7 +106,7 @@ TEST_DATABASE_URL=postgresql+psycopg://log_user:password@localhost:5432/log_serv
 ```bash
 uvicorn app.main:app --reload
 ```
-The service will run on `http://localhost:8001` (or your chosen port)
+The service will run on `http://localhost:8000` (or your chosen port)
 
 ---
 
@@ -146,4 +146,5 @@ Tests:
 - Database access is abstracted via dependency injection
 - Pagination strategy matches real-world production systems
 - Environment-based configuration enables Docker and CI/CD workflows
+
 
