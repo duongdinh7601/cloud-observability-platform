@@ -26,11 +26,7 @@ import { getApiBaseUrl } from "./http"
 export type FetchLogsParams = 
 {
   limit?: number
-  cursor?: 
-  {
-    cursor_ts: string
-    cursor_id: number
-  }
+  cursor?:  Cursor
   level?: string
   service_name?: string
   start_time?: string
