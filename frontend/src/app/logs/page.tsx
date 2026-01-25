@@ -13,8 +13,14 @@ import { useDebouncedValue } from "@/lib/use-debounced-value"
 export default function LogsPage() {
   const limit = 10
 
-  const [filters, setFilters] = useState
-  ({
+  const clearFilters = () => {
+    setFilters({
+      level: "",
+      service_name: "",
+    })
+  }
+
+  const [filters, setFilters] = useState({
     level: "",
     service_name: "",
   })
@@ -30,7 +36,8 @@ export default function LogsPage() {
     refetch, 
     fetchNextPage, 
     hasNextPage, 
-    isFetchingNextPage, 
+    isFetchingNextPage,
+    isFetching 
   } = useInfiniteQuery<
     LogListResponse, 
     Error, 
@@ -52,16 +59,7 @@ export default function LogsPage() {
   // Computing a flat list of items
   const items = data?.pages.flatMap((p) => p.items) ?? []
 
-  // Loading page
-  if (isLoading) 
-  {
-    return (
-      <div className="space-y-4">
-        <h1 className="text-2x1 font-semibold">Logs</h1>
-        <LogListSkeleton rows={8} />
-      </div>
-    )
-  }
+  const hasItems = items.length > 0
 
   // Error
   if (isError) 
@@ -79,23 +77,33 @@ export default function LogsPage() {
     )
   }
 
-  // Empty logs
-  if (items.length === 0) {
-  return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Logs</h1>
-      <div className="text-sm text-muted-foreground">No logs found.</div>
-    </div>
-  )
-}
-
 // Display logs
 return (
   <div className="space-y-4">
     <h1 className="text-2xl font-semibold">Logs</h1>
 
     <LogFilters value={filters} onChange={setFilters} />
-    <LogList items={items} />
+    
+    {isFetching && (
+      <div className="text-sm text-muted-foreground">Filtering...</div>
+    )}
+
+    {!hasItems && isLoading ? (
+      <LogListSkeleton rows={8} />
+    ) : hasItems ? (
+      <LogList items={items} /> 
+    ) : (
+      <div className="space-y-2">
+        <div className="text-sm text-muted-foreground">
+          No logs match the current filters.
+        </div>
+
+        <Button variant="outline" onClick={clearFilters}>
+          Clear filters
+        </Button>
+      </div>
+
+    )}
 
     <div>
       <Button
