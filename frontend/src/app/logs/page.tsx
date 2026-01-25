@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { fetchLogs } from "@/lib/api/logs"
 import { LogList } from "@/components/log-list"
 import { Button } from "@/components/ui/button"
+import { LogListSkeleton } from "@/components/log-list-skeleton"
 
 export default function LogsPage() {
   const { data, isLoading, isError, error, refetch } = useQuery({
@@ -17,7 +18,7 @@ export default function LogsPage() {
     return (
       <div className="space-y-4">
         <h1 className="text-2x1 font-semibold">Logs</h1>
-        <div className="text-sm text-muted-foreground">Loading logs...</div>
+        <LogListSkeleton rows={8} />
       </div>
     )
   }
