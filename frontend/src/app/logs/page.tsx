@@ -1,17 +1,35 @@
 "use client"
 
 import { useInfiniteQuery } from "@tanstack/react-query"
+import type { Cursor, LogListResponse } from "@/lib/api/logs"
 import { fetchLogs } from "@/lib/api/logs"
 import { LogList } from "@/components/log-list"
 import { Button } from "@/components/ui/button"
 import { LogListSkeleton } from "@/components/log-list-skeleton"
-import { Cursor, LogListResponse } from "@/lib/api/logs"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { LogFilters } from "@/components/log-filters"
 import { useDebouncedValue } from "@/lib/use-debounced-value"
+import { useSearchParams, useRouter } from "next/navigation"
 
 export default function LogsPage() {
   const limit = 10
+
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const [filters, setFilters] = useState(() => {
+    const level = searchParams.get("level") ?? ""
+    const service_name = searchParams.get("service") ?? ""
+    return { level, service_name }
+  })
+
+  const debouncedService = useDebouncedValue(
+    filters.service_name, 
+    filters.service_name === "" ? 0 : 600
+  )
+
+  const hasActiveFilters =
+    filters.level !== "" || filters.service_name !== ""
 
   const clearFilters = () => {
     setFilters({
@@ -20,12 +38,29 @@ export default function LogsPage() {
     })
   }
 
-  const [filters, setFilters] = useState({
-    level: "",
-    service_name: "",
-  })
+  // URL -> state (back/forward sync)
+  useEffect(() => {
+    const level = searchParams.get("level") ?? ""
+    const service_name = searchParams.get("service") ?? ""
 
-  const debouncedService = useDebouncedValue(filters.service_name, 600)
+    setFilters((prev) => {
+      if (prev.level === level && prev.service_name === service_name) {
+        return prev
+      }
+      return { level, service_name }
+    })
+  }, [searchParams])
+
+  // state -> URL (replace to avoid history spam)
+  useEffect(() => {
+    const params = new URLSearchParams()
+
+    if (filters.level) params.set("level", filters.level)
+    if (debouncedService) params.set("service", debouncedService)
+
+    const qs = params.toString()
+    router.replace(qs ? `/logs?${qs}` : "/logs")
+  }, [filters.level, debouncedService, router])
   
   const 
   { 
@@ -42,7 +77,7 @@ export default function LogsPage() {
     LogListResponse, 
     Error, 
     LogListResponse, 
-    ["logs", { limit: number }], 
+    ["logs", { limit: number; level: string; service_name: string }], 
     Cursor | undefined
   >({
     queryKey: ["logs", { limit, level: filters.level, service_name: debouncedService }],
@@ -66,7 +101,7 @@ export default function LogsPage() {
   {
     return (
       <div className="space-y-4">
-        <h1 className="text-2x1 font-semibold">Logs</h1>
+        <h1 className="text-2xl font-semibold">Logs</h1>
         
         <div className="text-sm text-destructive">
           Failed to load logs: {error.message}
@@ -83,26 +118,27 @@ return (
     <h1 className="text-2xl font-semibold">Logs</h1>
 
     <LogFilters value={filters} onChange={setFilters} />
-    
-    {isFetching && (
-      <div className="text-sm text-muted-foreground">Filtering...</div>
-    )}
+
+    <div className="flex items-center gap-3">
+      {hasActiveFilters && (
+        <Button variant="outline" onClick={clearFilters}>
+          Clear filters
+        </Button>
+      )}
+
+      {isFetching && (
+        <div className="text-sm text-muted-foreground">Filtering…</div>
+      )}
+    </div>
 
     {!hasItems && isLoading ? (
       <LogListSkeleton rows={8} />
     ) : hasItems ? (
       <LogList items={items} /> 
     ) : (
-      <div className="space-y-2">
-        <div className="text-sm text-muted-foreground">
-          No logs match the current filters.
-        </div>
-
-        <Button variant="outline" onClick={clearFilters}>
-          Clear filters
-        </Button>
+      <div className="text-sm text-muted-foreground">
+        No logs match the current filters.
       </div>
-
     )}
 
     <div>
@@ -116,5 +152,4 @@ return (
 
   </div>
 )
-
 }
