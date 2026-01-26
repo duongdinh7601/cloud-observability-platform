@@ -1,5 +1,10 @@
+"use client"
+
 import { Badge } from "@/components/ui/badge"
 import { LogItem } from "@/lib/api/logs"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+
 
 type LogRowProps = 
 {
@@ -39,6 +44,14 @@ function timeAgo(iso: string)
 
 export function LogRow({ log }: LogRowProps) 
 {
+  const [copied, setCopied] = useState(false)
+
+  async function onCopy() {
+    await navigator.clipboard.writeText(log.message)
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 800)
+  }
+
   return (
     <div className="flex gap-4 rounded-md border p-3 text-sm">
       <div className="w-40 shrink-0 font-mono text-muted-foreground"
@@ -58,6 +71,12 @@ export function LogRow({ log }: LogRowProps)
 
       <div className="flex-1 break-words">
         {log.message}
+      </div>
+
+      <div className="shrink-0">
+        <Button variant="ghost" size="sm" onClick={onCopy}>
+          {copied ? "Copied" : "Copy"}
+        </Button>
       </div>
     </div>
   )
