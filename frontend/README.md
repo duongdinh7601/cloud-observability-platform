@@ -115,4 +115,3 @@ The app will run on `http://localhost:3000` and connect to the backend API.
 - Authentication & role-based access
 
 
-
