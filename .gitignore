@@ -12,6 +12,10 @@ dist/
 npm-debug.log*
 yarn-error.log*
 
+# Next.js (frontend)
+frontend/.next/
+frontend/.env.local
+
 # VSCode
 .vscode/
 
