@@ -1,9 +1,7 @@
 # Python
 __pycache__/
 *.py[cod]
-*.env
 venv/
-.env
 
 # Node / React
 node_modules/
@@ -22,3 +20,8 @@ frontend/.env.local
 # Mac / Linux
 .DS_Store
 *.swp
+
+# Env files (never commit secrets)
+**/.env
+**/.env.*
+!.env.example
