@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# build output
+.next/
+
+# env files
+.env
+.env.*
+
+# misc
+*.log
+npm-debug.log*
+.vscode/
+.DS_Store
