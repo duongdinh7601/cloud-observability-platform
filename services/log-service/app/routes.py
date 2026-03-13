@@ -8,7 +8,7 @@ from app.dependencies import parse_level, resolve_cursor
 from typing import Optional, Tuple
 from datetime import datetime
 
-router = APIRouter()
+router = APIRouter(tags=["logs"])
 
 @router.post("/logs", status_code=201)
 def create_log(log: LogEntry, db: Session = Depends(get_db)):

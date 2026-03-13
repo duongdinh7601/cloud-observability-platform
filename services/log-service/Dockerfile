@@ -14,9 +14,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # 5) Copy application code
 COPY app ./app
+COPY scripts ./scripts
 
 # 6) Expose the port uvicorn will listen on
 EXPOSE 8000
 
-# 7) Start the service
+# 7) Health check to ensure service is ready to accept traffic
+HEALTHCHECK --interval=5s --timeout=3s --start-period=5s --retries=3 CMD ["python", "scripts/container_healthcheck.py"]
+
+# 8) Start the service
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
