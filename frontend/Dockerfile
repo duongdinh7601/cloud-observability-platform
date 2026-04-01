@@ -1,20 +1,19 @@
-# Base runtime image
-FROM node:20-slim
-
-# Set working directory inside the container
+# Build stage
+FROM node:20-slim AS build
 WORKDIR /app
-
-# Copy package.json and package-lock.json
 COPY package*.json ./
-
-# Install dependencies
 RUN npm ci
-
-# Copy in the code
 COPY . .
+RUN npm run build
 
-# Expose port
+
+# Runtime stage
+FROM node:20-slim AS runtime
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY --from=build /app/.next ./.next
+COPY --from=build /app/public ./public
+COPY --from=build /app/next.config.ts ./
 EXPOSE 3000
-
-# Run the app
-CMD ["npm", "run", "dev", "--","-H", "0.0.0.0"]
+CMD ["npm", "run", "start"]
