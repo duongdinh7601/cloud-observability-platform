@@ -99,14 +99,21 @@ pip install -r requirements.txt
 ```
 4. Configure environment variables:
 ```bash
-DATABASE_URL=postgresql+psycopg://log_user:password@localhost:5432/log_service_db
-TEST_DATABASE_URL=postgresql+psycopg://log_user:password@localhost:5432/log_service_test_db
+copy .env.example .env
+```
+Then update values as needed for your local PostgreSQL setup:
+```bash
+DATABASE_URL=postgresql+psycopg://log_user:logpw@localhost:5432/log_service_db
+TEST_DATABASE_URL=postgresql+psycopg://log_user:logpw@localhost:5432/log_service_test_db
+CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 ```
 5. Start the service locally:
 ```bash
 uvicorn app.main:app --reload
 ```
 The service will run on `http://localhost:8000` (or your chosen port)
+If `DATABASE_URL` is omitted locally, the app falls back to the same default shown above for convenience.
+Docker Compose uses the env values defined in the repo root `docker-compose.yml`.
 
 ---
 

@@ -36,6 +36,8 @@ def get_logs(
     db: Session = Depends(get_db)
     ):
 
+    # Order newest-first and use id as a tie-breaker so pagination stays stable
+    # even when multiple logs share the same timestamp.
     query = db.query(Log).order_by(Log.timestamp.desc(), Log.id.desc())
 
     if level is not None:
@@ -61,7 +63,9 @@ def get_logs(
 
     if cursor is not None:
         cursor_ts, cursor_id = cursor
-        query =query.filter(
+        # Fetch rows strictly after the current cursor in descending order.
+        # The timestamp/id pair prevents duplicates or skipped rows between pages.
+        query = query.filter(
             or_(Log.timestamp < cursor_ts, and_(Log.timestamp == cursor_ts, Log.id < cursor_id))
         )
 
@@ -72,6 +76,7 @@ def get_logs(
         next_cursor = None
     else:
         last_log = logs[-1]
+        # The next page starts after the last item we returned on this page.
         next_cursor = CursorResponse(cursor_ts=(last_log.timestamp), cursor_id=last_log.id)
     
     return LogListResponse(items=logs, next_cursor=next_cursor)

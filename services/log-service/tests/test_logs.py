@@ -1,17 +1,12 @@
-import os
-
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.settings import TEST_DATABASE_URL
 from app.main import app
 from app.database import get_db
 from app.models import Base, Log
-from dotenv import load_dotenv
 
-# load env
-load_dotenv()
-TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL")
 assert TEST_DATABASE_URL, "TEST_DATABASE_URL is not set"
 
 engine = create_engine(TEST_DATABASE_URL)
