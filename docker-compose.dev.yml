@@ -6,8 +6,6 @@ services:
 
   # Backend service
   log-service:
-    environment:
-      CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
     ports:
       - "8000:8000"
 
@@ -17,7 +15,6 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
       WATCHPACK_POLLING: "true"
     volumes:
       - ./frontend:/app
