@@ -14,6 +14,6 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
-COPY --from=build /app/next.config.ts ./
+COPY --from=build /app/next.config.mjs ./
 EXPOSE 3000
 CMD ["npm", "run", "start"]
