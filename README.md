@@ -1,40 +1,59 @@
 # Cloud Observability Platform
 
-A **full-stack, cloud-native observability platform** that demonstrates modern backend and frontend development, containerization, and deployment practices.  
+A full-stack observability platform built to demonstrate production-minded engineering across backend, frontend, and deployment workflows.
 
-The project is designed for learning and portfolio purposes and includes log ingestion, data storage, and a React frontend for visualization. Future iterations will add monitoring, metrics, and Kubernetes orchestration.
-
----
+The current platform centers on a log ingestion service, a Next.js dashboard, and a container architecture that separates local development behavior from a production-like runtime path.
 
 ## Tech Stack
 
-- **Frontend:** React + TypeScript
-- **Backend Services:** Python + FastAPI
-- **Database:** PostgreSQL
-- **Containerization:** Docker
-- **Orchestration (future):** Kubernetes
-- **Monitoring (future):** Prometheus + Grafana
+- Frontend: Next.js 15, React 18, TypeScript, Tailwind CSS, shadcn/ui, TanStack Query
+- Backend: Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.x, psycopg v3
+- Database: PostgreSQL 16
+- Containerization: Docker, Docker Compose
+- Future platform work: Kubernetes, Prometheus, Grafana
 
----
+## Repository Layout
 
-## Components
+| Path | Purpose |
+| --- | --- |
+| `frontend/` | Next.js logs dashboard and frontend container image |
+| `services/log-service/` | FastAPI log ingestion and retrieval service |
+| `services/api-gateway/` | Placeholder for a future gateway service |
+| `docs/` | Architecture notes, service docs, and roadmap |
+| `infra/` | Placeholder area for future Docker/Kubernetes infrastructure artifacts |
+| `scripts/` | Shared repo-level utility script area |
 
-| Component        | Purpose                                                                 |
-|-----------------|-------------------------------------------------------------------------|
-| `frontend/`      | React dashboard for viewing logs and metrics                            |
-| `services/`      | Backend services (API gateway, log ingestion, future metrics/alerts)   |
-| `infra/`         | Docker and Kubernetes configuration                                     |
-| `docs/`          | Architecture, roadmap, and service documentation                        |
-| `scripts/`       | Utility scripts for setup or database seeding                           |
+## Container Architecture
 
----
+- The frontend is the single public entrypoint in the production-like Compose path.
+- The frontend reaches the backend through same-origin routing, so the browser does not call the backend directly.
+- The backend API and PostgreSQL database stay internal to the container network in the production-like deployment model.
+- Both application services expose health endpoints and container healthchecks so readiness is explicit at the service boundary.
 
-## Roadmap
+## Run Modes
 
-1. **Week 1:** Design first backend service (log ingestion)
-2. **Week 2:** Implement `POST /logs` and connect to PostgreSQL
-3. **Week 3:** Implement `GET /logs` with filters and pagination
-4. **Week 4:** Build React frontend dashboard
-5. **Week 5:** Containerize services with Docker
-6. **Week 6:** Deploy backend to Kubernetes
-7. **Week 7+:** Add metrics, alerting, and monitoring
+- `docker-compose.yml` defines the shared internal service topology and common runtime wiring.
+- `docker-compose.dev.yml` adds local developer behavior such as host port publishing, source mounts, and frontend hot reload.
+- `docker-compose.prod.yml` adds production-like operational behavior, exposing only the frontend and applying restart policies.
+
+### Local Development
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+### Production-Like Compose Path
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build
+```
+
+## Current Progress
+
+- Phase 1: Backend log service - complete
+- Phase 2: Frontend logs dashboard - complete
+- Phase 3: Container maturity and production-like Compose path - in progress
+- Phase 4: Kubernetes deployment - planned
+- Phase 5: Platform observability with Prometheus and Grafana - planned
+
+See [docs/roadmap.md](docs/roadmap.md) for the phase-based roadmap.

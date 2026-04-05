@@ -1,118 +1,110 @@
 # Project Roadmap
 
-This document outlines the **development and learning plan** for the Cloud Observability Platform.
+This roadmap tracks the platform by phases instead of calendar weeks so progress can stay realistic and sustainable.
 
----
+## Phase 1 - Backend Log Service
 
-## Phase 1: Week 1 – Backend Skeleton
+Status: Complete
 
-**Goals:**  
-- Implement FastAPI skeleton for Log Service  
-- Define Pydantic models for request/response  
-- Connect to PostgreSQL  
-- Implement `POST /logs` endpoint  
+Goals:
 
-**Tasks:**  
-- `app/main.py` → FastAPI app, DB connection setup  
-- `schemas.py` → LogEntry Pydantic model  
-- `routes.py` → Add `POST /logs` route  
-- Test endpoint with Postman/curl  
+- Build the FastAPI log service
+- Model log data with Pydantic and SQLAlchemy
+- Support log ingestion and retrieval
 
-**Learning Focus:** FastAPI, Pydantic, PostgreSQL, REST API basics  
+Key outcomes:
 
----
+- `POST /logs`
+- `GET /logs`
+- Cursor pagination with stable ordering
+- Filtering by level, service, and time range
+- Integration tests with dependency overrides and a separate test database
 
-## Phase 2: Week 2 – GET Endpoint & Filtering
+## Phase 2 - Frontend Logs Dashboard
 
-**Goals:**  
-- Implement `GET /logs` endpoint with filters and pagination  
+Status: Complete
 
-**Tasks:**  
-- Add query parameters: `start_time`, `end_time`, `level`, `service_name`, `page`, `limit`  
-- Implement database queries  
-- Test filtering, pagination, and responses  
+Goals:
 
-**Learning Focus:** SQL queries, API testing, response formatting  
+- Build a production-minded logs dashboard in Next.js
+- Support filtering, pagination, and resilient loading states
 
----
+Key outcomes:
 
-## Phase 3: Week 3 – Frontend Setup
+- Logs dashboard with App Router
+- TanStack Query data fetching
+- URL-synced filters
+- Debounced search
+- Empty, loading, and error states
 
-**Goals:**  
-- Set up React frontend  
-- Fetch logs from Log Service  
-- Display logs in table with pagination  
+## Phase 3 - Container Architecture and Production-Like Runtime
 
-**Tasks:**  
-- Initialize React project (`frontend/`)  
-- Create `LogsTable` component  
-- `api.ts` → API service calls to backend  
+Status: In Progress
 
-**Learning Focus:** React, TypeScript, Axios/fetch, table UI  
+Goals:
 
----
+- Containerize the full stack
+- Separate development and production-like runtime behavior
+- Add operational health surfaces to both application services
 
-## Phase 4: Week 4 – Frontend Forms & Filters
+Key outcomes so far:
 
-**Goals:**  
-- Add log submission form (`POST /logs`)  
-- Add filtering options in frontend  
+- Shared `docker-compose.yml` plus `docker-compose.dev.yml` and `docker-compose.prod.yml`
+- Backend readiness and liveness endpoints
+- Backend container healthcheck
+- Frontend same-origin API routing through Next rewrites
+- Frontend multi-stage Docker image
+- Frontend `/health` route and container healthcheck
+- Production-like Compose path with a single public frontend entrypoint
 
-**Tasks:**  
-- `LogForm` component → submit new logs  
-- Filters: date range, severity, service  
-- Connect filters to `GET /logs`  
+Next likely improvements:
 
-**Learning Focus:** React forms, state management, frontend-backend integration  
+- Additional container hardening
+- Clearer platform documentation
+- More explicit deployment-oriented configuration boundaries
 
----
+## Phase 4 - Kubernetes Deployment
 
-## Phase 5: Week 5 – Docker Containerization
+Status: Planned
 
-**Goals:**  
-- Containerize backend and frontend  
-- Enable local dev with Docker Compose  
+Goals:
 
-**Tasks:**  
-- Write Dockerfiles for each service  
-- Create `docker-compose.yml`  
-- Test local containers and networking  
+- Translate the container model into Kubernetes resources
+- Introduce Services, Deployments, and ingress-level routing
 
-**Learning Focus:** Docker, Docker Compose, multi-service local dev  
+Potential scope:
 
----
+- Deploy frontend and log-service to a cluster
+- Add ConfigMaps and Secrets
+- Explore scaling behavior and health probe mapping
 
-## Phase 6: Week 6 – API Gateway & Kubernetes
+## Phase 5 - Platform Observability
 
-**Goals:**  
-- Implement API Gateway routing requests  
-- Deploy services to Kubernetes (optional)  
+Status: Planned
 
-**Tasks:**  
-- API Gateway (`services/api-gateway`) → route to Log Service  
-- Kubernetes manifests → Pods, Services, ConfigMaps  
-- Test scaling and inter-service communication  
+Goals:
 
-**Learning Focus:** FastAPI routing, Kubernetes basics, scaling  
+- Add self-observability to the platform
+- Monitor the platform with metrics and dashboards
 
----
+Potential scope:
 
-## Phase 7: Week 7+ – Monitoring & Expansion
+- Prometheus metrics
+- Grafana dashboards
+- Service monitoring and alerting
 
-**Goals:**  
-- Add Metrics & Alerting services  
-- Integrate Prometheus + Grafana  
-- Continuous improvement and performance tuning  
+## Phase 6 - Platform Expansion
 
-**Tasks:**  
-- Create new backend services for metrics/alerts  
-- Connect to Prometheus/Grafana  
-- Performance testing and logging improvements  
+Status: Planned
 
-**Learning Focus:** Observability, monitoring, alerts, production-grade design
+Goals:
 
-Connect to Prometheus/Grafana
+- Expand beyond the initial log-service-focused architecture
+- Introduce additional internal services when the platform design justifies them
 
-Performance testing and logging improvements
+Potential scope:
 
-Learning Focus: Observability, monitoring, alerts, production-grade design
+- API gateway
+- Metrics service
+- Alerts or rules service
+- Shared platform-level contracts

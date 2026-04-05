@@ -1,85 +1,57 @@
 # Log Service
 
-The Log Service is a **backend microservice** in the Cloud Observability Platform.  
-It is responsible for ingesting, storing, and retrieving application logs in a scalable and production-oriented way.
+The Log Service is a FastAPI microservice responsible for ingesting, storing, and retrieving logs for the Cloud Observability Platform.
 
-This service exposes a REST API consumed by the frontend dashboard and is designed to be modular, independently deployable, and horizontally scalable.
-
----
+It is designed as an internal backend service that can be run locally, tested in isolation, and deployed as part of a multi-service container stack.
 
 ## Responsibilities
 
-- Accept log entries via HTTP (`POST /logs`)  
-- Store logs in PostgreSQL  
-- Provide **filtered and cursor-paginated** access to logs (`GET /logs`)  
-- Enforce input validation and API contracts
-- Serve as a standalone microservice suitable for containerized deployment 
-
----
+- Accept log entries through `POST /logs`
+- Return logs through `GET /logs`
+- Support cursor pagination, filtering, and stable newest-first ordering
+- Expose operational health endpoints for container readiness and liveness
 
 ## Tech Stack
 
-- **Python + FastAPI** - API backend
-- **Pydantic v2** - request/response validation
-- **SQLAlchemy** - ORM  
-- **PostgreSQL** - persistent log storage
-- **psycopg** - Postgres driver
-- **pytest** - integration testing
-- **Uvicorn** - ASGI server  
-- **Docker** - containerization  
+- Python 3.12
+- FastAPI
+- Pydantic v2
+- SQLAlchemy 2.x
+- PostgreSQL
+- psycopg v3
+- pytest
 
----
+## API Surface
 
-## Key Features
+- `POST /logs`
+- `GET /logs`
+- `GET /health/live`
+- `GET /health/ready`
 
-**Cursor-Based Pagination**
-- Pagination uses a cursor composed of `(timestamp, id)`
-- Prevents performance issues and inconsistencies caused by offset-based pagination
-- Ensures:
-  - no duplicate results
-  - stable ordering under concurrent writes
- 
-**Filtering**
-- Filter logs by:
-  - log level
-  - service name (case-insensitive)
-  - time range(`start_time`, `end_time`)
-- Input validation handled via FastAPI dependencies
+## Key Behaviors
 
-**Testing**
-- Integration tests using **pytest**
-- Separate **PostgreSQL test database**
-- FastAPI dependency overrides for clean test isolation
-- Deterministic, repeatable test runs
+### Pagination
 
----
+- Uses a cursor composed of `(timestamp, id)`
+- Orders by `timestamp DESC, id DESC`
+- Avoids offset-based pagination drift under concurrent writes
 
-## Folder Structure
+### Filtering
 
-log-service/
-```graphql
-├── app/
-│   ├── main.py          # FastAPI application entry point
-│   ├── database.py      # SQLAlchemy engine + session
-│   ├── models.py        # ORM models
-│   ├── routes.py        # API routes
-│   ├── schemas.py       # Pydantic schemas
-│   └── dependencies.py  # Request parsing & validation dependencies
-│
-├── tests/
-│   └── test_logs.py     # Integration tests
-│
-├── requirements.txt     # Python dependencies
-├── .env                 # Local environment variables (gitignored)
-├── Dockerfile           # Container build (Phase 3)
-└── README.md
-```
+- `level`
+- `service_name`
+- `start_time`
+- `end_time`
 
---- 
+### Operational Design
 
-## Setup Instructions
+- Readiness checks confirm the service can still reach PostgreSQL
+- Liveness stays lightweight and process-focused
+- CORS is only enabled when origins are explicitly configured
 
-1. Navigate to the log-service folder:  
+## Local Development
+
+1. Move into the service directory:
 ```bash
 cd services/log-service
 ```
@@ -87,71 +59,64 @@ cd services/log-service
 ```bash
 python -m venv venv
 
-# Linux / macOS
-source venv/bin/activate
-
 # Windows
 venv\Scripts\activate
+
+# macOS / Linux
+source venv/bin/activate
 ```
 3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
-4. Configure environment variables:
+4. Copy local environment defaults:
 ```bash
 copy .env.example .env
 ```
-Then update values as needed for your local PostgreSQL setup:
-```bash
-DATABASE_URL=postgresql+psycopg://log_user:logpw@localhost:5432/log_service_db
-TEST_DATABASE_URL=postgresql+psycopg://log_user:logpw@localhost:5432/log_service_test_db
-CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-```
-5. Start the service locally:
+5. Start the API:
 ```bash
 uvicorn app.main:app --reload
 ```
-The service will run on `http://localhost:8000` (or your chosen port)
-If `DATABASE_URL` is omitted locally, the app falls back to the same default shown above for convenience.
-Docker Compose uses the env values defined in the repo root `docker-compose.yml`.
 
----
+## Configuration
 
-## API Endpoints
+Local development reads values from `.env`.
 
-- `POST /logs` -> Create a new log entry
-- `GET /logs`
-  - Retrieve logs with:
-    - cursor-based pagination
-    - optional filters
-    - stable ordering (newest first)
-  - Response includes:
-    - `items`: list of log entries
-    - `next_cursor`: cursor for fetching the next page
+Important settings:
 
-For full API documentation, see `docs/log-service.md`
+- `DATABASE_URL`
+- `TEST_DATABASE_URL`
+- `CORS_ORIGINS`
 
----
+When `DATABASE_URL` is omitted for local-only usage, the service falls back to the default defined in `app/settings.py`.
 
 ## Testing
 
-Run integration tests:
+Run the integration tests with:
+
 ```bash
 pytest
 ```
 
-Tests:
-- use a dedicated test database
-- override database dependencies
-- validate cursor pagination behavior end-to-end
+The test suite uses a dedicated test database and dependency overrides so API behavior can be verified without touching the development database.
 
----
+## Service Structure
 
-## Notes
-
-- The service is stateless and safe to scale horizontally
-- Database access is abstracted via dependency injection
-- Pagination strategy matches real-world production systems
-- Environment-based configuration enables Docker and CI/CD workflows
-
-
+```text
+services/log-service/
+|-- app/
+|   |-- health.py
+|   |-- main.py
+|   |-- models.py
+|   |-- routes.py
+|   |-- schemas.py
+|   |-- settings.py
+|-- scripts/
+|   |-- container_healthcheck.py
+|-- tests/
+|   |-- test_logs.py
+|-- Dockerfile
+|-- requirements.txt
+|-- .env.example
+|-- README.md
+```

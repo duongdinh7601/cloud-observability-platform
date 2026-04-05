@@ -1,117 +1,77 @@
 # Frontend Dashboard
 
-The frontend is a **Next.js + TypeScript** application for the Cloud Observability Platform.  
-It provides a production-style dashboard to **browse, filter, and inspect log data** collected by backend services.
+The frontend is a Next.js dashboard for browsing and inspecting logs from the Cloud Observability Platform.
 
-This frontend is designed as a **client-first observability UI**, similar in spirit to tools like Datadog or Kibana, with a strong focus on usability, performance, and maintainable architecture.
+It is built as the public-facing entrypoint of the platform and uses same-origin routing to reach backend APIs without exposing backend container details to the browser.
 
----
+## Responsibilities
 
-## Features
-
-- Display logs in a structured, readable list
-- Cursor-based pagination with “Load more”
-- Filter logs by:
-  - Severity level (select input)
-  - Service name (debounced text search)
-- URL-synced filters (shareable & refresh-safe)
-- Skeleton loading states (no layout shift)
-- Friendly error and empty states with recovery actions
-- Colored severity badges for fast scanning
-- Relative timestamps with full timestamp tooltip
-- Copy-to-clipboard action for log messages
-- Modular, reusable UI components
-
----
+- Render the logs dashboard UI
+- Fetch paginated log data from the backend
+- Keep filters in the URL for shareable state
+- Expose a lightweight `/health` endpoint for container readiness
 
 ## Tech Stack
 
-- **Next.js (App Router)** for routing and rendering
-- **React + TypeScript** for component-driven UI with strong type safety
-- **Tailwind CSS** for utility-first styling
-- **shadcn/ui** for accessible, composable UI primitives
-- **TanStack Query (React Query)** for client-side data fetching, caching, and pagination
-- **Fetch API** for communicating with backend services
+- Next.js 15 App Router
+- React 18
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- TanStack Query
 
----
+## Key Features
 
-## Architecture & Design Principles
+- Infinite-style pagination with "Load more"
+- Level and service filters
+- Debounced service search
+- URL-synced filter state
+- Skeleton loading and retry UI
+- Relative timestamps and copy-to-clipboard actions
+- Same-origin API access through Next rewrites
 
-- **Client-first rendering** for interactive dashboards
-- **Clear separation of concerns**:
-  - Page components orchestrate data and state
-  - Presentational components render UI only
-- **Query-driven state** (filters and pagination are part of the query key)
-- **Environment-agnostic configuration** (API base URL via environment variables)
-- **Production-minded UX patterns** (debounce, skeletons, recovery actions)
+## Architecture Notes
 
----
+- The browser requests `/api/...` on the frontend origin
+- Next rewrites those requests to the internal backend service
+- The frontend container exposes `/health` for operational checks
+- The production-like frontend image uses a multi-stage Docker build and a stable runtime command
 
-## Folder Structure
+## Local Development
 
-frontend/
-```graphql
-├── src/
-│   ├── app/                  # Next.js App Router pages & layouts
-│   │   ├── layout.tsx         # Global app layout (AppShell)
-│   │   ├── page.tsx           # Home page
-│   │   └── logs/
-│   │       └── page.tsx       # Logs dashboard
-│   ├── components/            # Reusable UI components
-│   │   ├── log-row.tsx
-│   │   ├── log-list.tsx
-│   │   ├── log-filters.tsx
-│   │   └── ui/                # shadcn/ui components
-│   ├── lib/
-│   │   ├── api/               # Typed API clients
-│   │   └── use-debounced-value.ts
-│   └── styles/
-│       └── globals.css
-├── public/                    # Static assets
-├── package.json
-├── tsconfig.json
-└── README.md
+For the full platform, run the repo root Compose files:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
----
+If you want to run the frontend by itself:
 
-## Setup Instructions
-
-### Prerequisites
-- Node.js 18+
-- npm
-
-1. Navigate to the frontend folder:
 ```bash
 cd frontend
-```
-2. Install dependencies:
-```bash
 npm install
-```
-3. Start the development server:
-```bash
 npm run dev
 ```
-The app will run on `http://localhost:3000` and connect to the backend API.
 
----
+## Frontend Structure
 
-## Notes
-
-- Designed to be **modular and scalable**
-- Built with real-world dashboard patterns (pagination, filters, URL sync)
-- Intended to be containerized alongside backend services
-- Integrates with the Log Service via REST APIs (`GET /logs`, `POST /logs`)
-
----
-
-## Future Improvements
-
-- Time range filter (start / end timestamp)
-- Log level aggregation & charts
-- Live log streaming
-- Metrics and alert dashboards
-- Authentication & role-based access
-
-
+```text
+frontend/
+|-- src/
+|   |-- app/
+|   |   |-- health/
+|   |   |   |-- route.ts
+|   |   |-- logs/
+|   |   |   |-- page.tsx
+|   |-- components/
+|   |-- lib/
+|   |   |-- api/
+|   |   |-- use-debounced-value.ts
+|-- public/
+|-- scripts/
+|   |-- container_healthcheck.js
+|-- Dockerfile
+|-- next.config.mjs
+|-- package.json
+|-- README.md
+```
