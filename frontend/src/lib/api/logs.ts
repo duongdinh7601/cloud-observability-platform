@@ -21,7 +21,7 @@ export type LogListResponse =
   next_cursor: Cursor | null
 }
 
-import { getApiBaseUrl } from "./http"
+import { getApiBasePath } from "./http"
 
 export type FetchLogsParams = 
 {
@@ -35,21 +35,26 @@ export type FetchLogsParams =
 
 export async function fetchLogs(params: FetchLogsParams = {}): Promise<LogListResponse> 
 {
-  const url = new URL("/logs", getApiBaseUrl())
+  const query = new URLSearchParams()
 
-  if (params.limit !== undefined) url.searchParams.set("limit", String(params.limit))
-  if (params.level) url.searchParams.set("level", params.level)
-  if (params.service_name) url.searchParams.set("service_name", params.service_name)
-  if (params.start_time) url.searchParams.set("start_time", params.start_time)
-  if (params.end_time) url.searchParams.set("end_time", params.end_time)
+  if (params.limit !== undefined) query.set("limit", String(params.limit))
+  if (params.level) query.set("level", params.level)
+  if (params.service_name) query.set("service_name", params.service_name)
+  if (params.start_time) query.set("start_time", params.start_time)
+  if (params.end_time) query.set("end_time", params.end_time)
 
   if (params.cursor) 
   {
-    url.searchParams.set("cursor_ts", params.cursor.cursor_ts)
-    url.searchParams.set("cursor_id", String(params.cursor.cursor_id))
+    query.set("cursor_ts", params.cursor.cursor_ts)
+    query.set("cursor_id", String(params.cursor.cursor_id))
   }
 
-  const res = await fetch(url.toString(), { cache: "no-store" })
+  const qs = query.toString()
+  const path = qs
+    ? `${getApiBasePath()}/logs?${qs}`
+    : `${getApiBasePath()}/logs`
+
+  const res = await fetch(path, { cache: "no-store" })
   if (!res.ok) 
   {
     const text = await res.text().catch(() => "")
