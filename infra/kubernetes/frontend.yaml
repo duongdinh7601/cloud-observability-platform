@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/duongdinh7601/cloud-observability-platform-frontend:latest
+          image: frontend:k8s-dev
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
 

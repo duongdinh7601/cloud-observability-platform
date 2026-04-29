@@ -24,7 +24,8 @@ spec:
     spec:
       containers:
         - name: log-service
-          image: ghcr.io/duongdinh7601/cloud-observability-platform-log-service:latest
+          image: log-service:k8s-dev
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
           env:
