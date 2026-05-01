@@ -1,6 +1,6 @@
 # Project Architecture
 
-The Cloud Observability Platform is a **full-stack, cloud-native project** designed for log ingestion, storage, and visualization. The architecture emphasizes modularity, scalability, and production-style practices.
+The Cloud Observability Platform is a full-stack, cloud-native project designed for log ingestion, storage, and visualization. The architecture emphasizes modularity, operational visibility, and production-shaped deployment practices.
 
 ---
 
@@ -8,9 +8,9 @@ The Cloud Observability Platform is a **full-stack, cloud-native project** desig
 
 | Component        | Purpose                                                                 |
 |-----------------|-------------------------------------------------------------------------|
-| `frontend/`      | React dashboard for viewing logs and metrics                            |
-| `services/`      | Backend services, including API Gateway and Log Service                 |
-| `infra/`         | Infrastructure configurations (Docker for local dev, Kubernetes later) |
+| `frontend/`      | Next.js dashboard for viewing and filtering logs                        |
+| `services/`      | Backend services, including the active Log Service and planned API Gateway |
+| `infra/`         | Infrastructure configuration, including Kubernetes base manifests and overlays |
 | `docs/`          | Documentation and design artifacts                                      |
 | `scripts/`       | Utility scripts (DB setup, seed data, automation)                       |
 
@@ -18,26 +18,46 @@ The Cloud Observability Platform is a **full-stack, cloud-native project** desig
 
 ## Component Interactions
 
-1. **Frontend**  
-   - Sends HTTP requests to the backend API (API Gateway / Log Service)  
-   - Receives JSON responses for logs or metrics
+1. **Frontend**
+   - Serves the dashboard as the public-facing app surface
+   - Uses same-origin `/api/...` requests from the browser
+   - Rewrites API requests internally to the Log Service
 
-2. **Backend Services**  
-   - `Log Service` receives log entries, validates, and stores them in PostgreSQL  
-   - `API Gateway` routes requests between frontend and backend services
+2. **Backend Services**
+   - `Log Service` receives log entries, validates requests, stores logs, and returns paginated results
+   - `API Gateway` is planned for a future phase when the platform has enough services to justify a dedicated backend boundary
 
-3. **Database**  
-   - PostgreSQL stores logs  
-   - Indexed for efficient querying
+3. **Database**
+   - PostgreSQL stores logs
+   - The current Kubernetes path runs Postgres in-cluster for learning; a managed database remains a production follow-up
 
-4. **Infrastructure**  
-   - Docker handles local development  
-   - Kubernetes handles production-like deployment (future)
+4. **Infrastructure**
+   - Docker Compose supports local and production-like container workflows
+   - Kubernetes runs the platform with Deployments, Services, Secrets, health probes, resource requests/limits, and Postgres storage
+   - Kustomize separates shared base manifests from environment-specific overlays
 
 ---
 
+## Runtime Request Path
+
+```text
+Browser
+-> Next.js frontend
+-> /api rewrite to log-service
+-> FastAPI Log Service
+-> PostgreSQL
+```
+
+In Kubernetes, Services provide the stable internal names:
+
+```text
+frontend:3000
+log-service:8000
+postgres:5432
+```
+
 ## Notes
 
-- Each service is **independently deployable**  
-- Modular design allows easy addition of new services (metrics, alerts)  
-- Designed to mirror **real-world production systems**
+- Each application service is independently containerized.
+- Modular design allows future services such as metrics, alerts, or a gateway to be added deliberately.
+- The project favors production-shaped decisions while keeping early implementations understandable.

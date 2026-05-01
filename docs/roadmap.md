@@ -39,7 +39,7 @@ Key outcomes:
 
 ## Phase 3 - Container Architecture and Production-Like Runtime
 
-Status: In Progress
+Status: Complete for current scope
 
 Goals:
 
@@ -47,7 +47,7 @@ Goals:
 - Separate development and production-like runtime behavior
 - Add operational health surfaces to both application services
 
-Key outcomes so far:
+Key outcomes:
 
 - Shared `docker-compose.yml` plus `docker-compose.dev.yml` and `docker-compose.prod.yml`
 - Backend readiness and liveness endpoints
@@ -57,7 +57,7 @@ Key outcomes so far:
 - Frontend `/health` route and container healthcheck
 - Production-like Compose path with a single public frontend entrypoint
 
-Next likely improvements:
+Production follow-ups:
 
 - Additional container hardening
 - Clearer platform documentation
@@ -65,18 +65,29 @@ Next likely improvements:
 
 ## Phase 4 - Kubernetes Deployment
 
-Status: Planned
+Status: In Progress
 
 Goals:
 
 - Translate the container model into Kubernetes resources
 - Introduce Services, Deployments, and ingress-level routing
 
-Potential scope:
+Key outcomes so far:
 
-- Deploy frontend and log-service to a cluster
-- Add ConfigMaps and Secrets
-- Explore scaling behavior and health probe mapping
+- Local Docker Desktop Kubernetes deployment for frontend, log-service, and Postgres
+- Kustomize base plus dev/prod overlay structure
+- ClusterIP Services for internal service discovery
+- Readiness and liveness probes for frontend and log-service
+- Resource requests and limits for all current workloads
+- Postgres PVC for local Kubernetes storage
+
+Next likely improvements:
+
+- Move raw committed Secrets to a safer secret workflow
+- Add ingress or gateway-level public routing
+- Replace placeholder production image tags with immutable release tags
+- Revisit Postgres as managed infrastructure or a StatefulSet
+- Add migration workflow before relying on Kubernetes for more production-like deployments
 
 ## Phase 5 - Platform Observability
 

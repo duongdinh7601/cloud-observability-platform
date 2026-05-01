@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: log-service
-          image: log-service:k8s-dev
+          image: log-service
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000

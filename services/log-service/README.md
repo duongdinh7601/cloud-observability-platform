@@ -48,6 +48,7 @@ It is designed as an internal backend service that can be run locally, tested in
 - Readiness checks confirm the service can still reach PostgreSQL
 - Liveness stays lightweight and process-focused
 - CORS is only enabled when origins are explicitly configured
+- Kubernetes injects `DATABASE_URL` from a Secret and routes traffic through an internal ClusterIP Service
 
 ## Local Development
 
@@ -99,6 +100,21 @@ pytest
 ```
 
 The test suite uses a dedicated test database and dependency overrides so API behavior can be verified without touching the development database.
+
+## Local Kubernetes
+
+From the repo root, build the local Kubernetes image and apply the dev overlay:
+
+```bash
+docker build -t log-service:k8s-dev services/log-service
+kubectl apply -k infra/kubernetes/overlays/dev
+```
+
+The service is internal to the cluster. For local Swagger UI access, use:
+
+```bash
+kubectl port-forward service/log-service 8000:8000
+```
 
 ## Service Structure
 
