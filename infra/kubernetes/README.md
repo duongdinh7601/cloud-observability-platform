@@ -13,6 +13,7 @@ infra/kubernetes/
 |   |-- kustomization.yaml
 |-- overlays/
 |   |-- dev/
+|   |   |-- ingress.yaml
 |   |   |-- kustomization.yaml
 |   |-- prod/
 |   |   |-- kustomization.yaml
@@ -21,7 +22,7 @@ infra/kubernetes/
 ## Base And Overlays
 
 - `base/` defines the shared Kubernetes shape: Deployments, Services, health probes, resource requests/limits, Secrets, and Postgres storage.
-- `overlays/dev/` adapts the base for local Docker Desktop Kubernetes by using local image tags such as `frontend:k8s-dev` and `log-service:k8s-dev`.
+- `overlays/dev/` adapts the base for local Docker Desktop Kubernetes by using local image tags such as `frontend:k8s-dev` and `log-service:k8s-dev`, plus a local Ingress host.
 - `overlays/prod/` documents the production-intent image shape with GHCR-hosted release images. It is not ready to apply until real release tags and production secret handling are in place.
 
 ## Local Docker Desktop Kubernetes
@@ -47,7 +48,67 @@ kubectl get services
 kubectl get pvc
 ```
 
-Expose the frontend locally:
+## Local Ingress
+
+The dev overlay includes an Ingress for the frontend:
+
+```text
+http://cloud-observability.local
+```
+
+The Ingress routes browser traffic to the internal `frontend` Service on port `3000`.
+
+Install the ingress-nginx controller before using the Ingress:
+
+```powershell
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/cloud/deploy.yaml
+```
+
+Wait for the controller:
+
+```powershell
+kubectl get pods -n ingress-nginx
+kubectl get services -n ingress-nginx
+```
+
+Apply the dev overlay:
+
+```powershell
+kubectl apply -k infra/kubernetes/overlays/dev
+```
+
+Inspect the Ingress:
+
+```powershell
+kubectl get ingress
+kubectl describe ingress frontend
+```
+
+Add this local hosts entry on Windows:
+
+```text
+127.0.0.1 cloud-observability.local
+```
+
+The hosts file is located at:
+
+```text
+C:\Windows\System32\drivers\etc\hosts
+```
+
+Flush DNS if the hostname does not resolve immediately:
+
+```powershell
+ipconfig /flushdns
+```
+
+Then open:
+
+```text
+http://cloud-observability.local
+```
+
+Port-forwarding is still useful for quick frontend checks:
 
 ```powershell
 kubectl port-forward service/frontend 3000:3000
