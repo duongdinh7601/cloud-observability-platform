@@ -15,6 +15,7 @@ infra/kubernetes/
 |   |-- dev/
 |   |   |-- ingress.yaml
 |   |   |-- kustomization.yaml
+|   |   |-- secrets.yaml
 |   |-- prod/
 |   |   |-- kustomization.yaml
 ```
@@ -24,6 +25,24 @@ infra/kubernetes/
 - `base/` defines the shared Kubernetes shape: Deployments, Services, health probes, resource requests/limits, Secrets, and Postgres storage.
 - `overlays/dev/` adapts the base for local Docker Desktop Kubernetes by using local image tags such as `frontend:k8s-dev` and `log-service:k8s-dev`, plus a local Ingress host.
 - `overlays/prod/` documents the production-intent image shape with GHCR-hosted release images. It is not ready to apply until real release tags and production secret handling are in place.
+
+## Secret Handling
+
+The base manifests reference Kubernetes Secret names but do not own the local secret values.
+
+Current local development behavior:
+
+- `overlays/dev/secrets.yaml` creates local-only Secret values for Docker Desktop Kubernetes.
+- `log-service` expects a Secret named `log-service-db` with a `DATABASE_URL` key.
+- `postgres` expects a Secret named `postgres-db` with `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DB` keys.
+
+This keeps the shared base focused on the secret contract while the dev overlay provides disposable local values.
+
+Production direction:
+
+- Do not commit real production credentials to Git.
+- Keep the same Secret names and keys as the workload contract.
+- Provide production values through a real secret-management workflow, such as External Secrets Operator connected to AWS Secrets Manager, Google Secret Manager, Azure Key Vault, or HashiCorp Vault.
 
 ## Local Docker Desktop Kubernetes
 
