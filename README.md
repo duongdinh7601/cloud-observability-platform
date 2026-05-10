@@ -7,7 +7,7 @@ The current platform centers on a log ingestion service, a Next.js dashboard, an
 ## Tech Stack
 
 - Frontend: Next.js 15, React 18, TypeScript, Tailwind CSS, shadcn/ui, TanStack Query
-- Backend: Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.x, psycopg v3
+- Backend: Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.x, Alembic, psycopg v3
 - Database: PostgreSQL 16
 - Containerization: Docker, Docker Compose
 - Orchestration: Kubernetes, Kustomize

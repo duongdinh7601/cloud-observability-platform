@@ -17,6 +17,7 @@ It is designed as an internal backend service that can be run locally, tested in
 - FastAPI
 - Pydantic v2
 - SQLAlchemy 2.x
+- Alembic
 - PostgreSQL
 - psycopg v3
 - pytest
@@ -91,6 +92,30 @@ Important settings:
 
 When `DATABASE_URL` is omitted for local-only usage, the service falls back to the default defined in `app/settings.py`.
 
+## Database Migrations
+
+The service uses Alembic to manage database schema changes. The FastAPI app does not create tables automatically on startup; schema changes should be applied intentionally through migrations.
+
+Run migration commands from the service directory:
+
+```bash
+cd services/log-service
+```
+
+Apply all pending migrations:
+
+```bash
+alembic upgrade head
+```
+
+Create a new migration after changing SQLAlchemy models:
+
+```bash
+alembic revision --autogenerate -m "describe schema change"
+```
+
+Review generated migration files before applying them. Autogeneration is a starting point, not a substitute for understanding the schema change.
+
 ## Testing
 
 Run the integration tests with:
@@ -127,11 +152,14 @@ services/log-service/
 |   |-- routes.py
 |   |-- schemas.py
 |   |-- settings.py
+|-- alembic/
+|   |-- versions/
 |-- scripts/
 |   |-- container_healthcheck.py
 |-- tests/
 |   |-- test_logs.py
 |-- Dockerfile
+|-- alembic.ini
 |-- requirements.txt
 |-- .env.example
 |-- README.md

@@ -18,6 +18,7 @@ Key outcomes:
 - `GET /logs`
 - Cursor pagination with stable ordering
 - Filtering by level, service, and time range
+- Alembic migration workflow for the log schema
 - Integration tests with dependency overrides and a separate test database
 
 ## Phase 2 - Frontend Logs Dashboard
@@ -80,6 +81,7 @@ Key outcomes so far:
 - Readiness and liveness probes for frontend and log-service
 - Resource requests and limits for all current workloads
 - Postgres PVC for local Kubernetes storage
+- Log-service schema creation moved out of application startup and into Alembic migrations
 
 Next likely improvements:
 
@@ -87,7 +89,7 @@ Next likely improvements:
 - Add ingress or gateway-level public routing
 - Replace placeholder production image tags with immutable release tags
 - Revisit Postgres as managed infrastructure or a StatefulSet
-- Add migration workflow before relying on Kubernetes for more production-like deployments
+- Add Kubernetes/CI migration execution workflow for deployment automation
 
 ## Phase 5 - Platform Observability
 
