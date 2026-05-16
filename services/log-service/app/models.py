@@ -1,5 +1,7 @@
-from sqlalchemy import Column, Integer, String, DateTime
 from datetime import datetime, timezone
+
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.dialects.postgresql import JSONB
 
 from .database import Base
 
@@ -13,3 +15,4 @@ class Log(Base):
     level = Column(String, index=True)
     service_name = Column(String, index=True)
     message = Column(String)
+    log_metadata = Column("metadata", JSONB, nullable=True)
