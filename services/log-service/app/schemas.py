@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
 from typing import Optional, List
 from enum import Enum
@@ -24,8 +24,7 @@ class LogResponse(BaseModel):
     message: str
     metadata: Optional[dict] = Field(default=None, validation_alias="log_metadata")
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class CursorResponse(BaseModel):
     cursor_ts: datetime
