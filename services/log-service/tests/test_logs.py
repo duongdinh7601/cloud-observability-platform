@@ -1,19 +1,31 @@
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from alembic import command
+from alembic.config import Config
+
 from app.settings import TEST_DATABASE_URL
 from app.main import app
 from app.database import get_db
-from app.models import Base, Log
+from app.models import Log
 
 assert TEST_DATABASE_URL, "TEST_DATABASE_URL is not set"
 
 engine = create_engine(TEST_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Create tables in the test database
-Base.metadata.create_all(bind=engine)
+# Run Alembic migrations against the test database before tests use it
+def run_migrations():
+    service_root = Path(__file__).resolve().parents[1]
+    alembic_cfg = Config(str(service_root / "alembic.ini"))
+    alembic_cfg.set_main_option("sqlalchemy.url", TEST_DATABASE_URL)
+    command.upgrade(alembic_cfg, "head")
+
+# Build the test database schema through Alembic, matching production's schema path
+run_migrations()
 
 
 def override_get_db():
