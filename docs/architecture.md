@@ -24,17 +24,19 @@ The Cloud Observability Platform is a full-stack, cloud-native project designed 
    - Rewrites API requests internally to the Log Service
 
 2. **Backend Services**
-   - `Log Service` receives log entries, validates requests, stores logs, and returns paginated results
+   - `Log Service` receives log entries, validates requests, stores logs and optional metadata, and returns cursor-paginated results
    - `API Gateway` is planned for a future phase when the platform has enough services to justify a dedicated backend boundary
 
 3. **Database**
    - PostgreSQL stores logs
+   - Alembic owns schema migrations; application startup does not create or mutate tables
    - The current Kubernetes path runs Postgres in-cluster for learning; a managed database remains a production follow-up
 
 4. **Infrastructure**
    - Docker Compose supports local and production-like container workflows
    - Kubernetes runs the platform with Deployments, Services, Secrets, health probes, resource requests/limits, and Postgres storage
    - Kustomize separates shared base manifests from environment-specific overlays
+   - Future CI/CD should run database migrations as a controlled step before rolling out new app pods
 
 ---
 
@@ -61,3 +63,4 @@ postgres:5432
 - Each application service is independently containerized.
 - Modular design allows future services such as metrics, alerts, or a gateway to be added deliberately.
 - The project favors production-shaped decisions while keeping early implementations understandable.
+- The next observability phase should start with structured service logs, then add metrics, dashboards, alerts, and eventually tracing.

@@ -29,6 +29,7 @@ It is built as the public-facing entrypoint of the platform and uses same-origin
 - Skeleton loading and retry UI
 - Relative timestamps and copy-to-clipboard actions
 - Same-origin API access through Next rewrites
+- Prepared for richer log metadata display as the backend API evolves
 
 ## Architecture Notes
 
@@ -37,6 +38,13 @@ It is built as the public-facing entrypoint of the platform and uses same-origin
 - The frontend container exposes `/health` for operational checks
 - The production-like frontend image uses a multi-stage Docker build and a stable runtime command
 - Kubernetes runs the frontend through the shared base manifest and environment-specific Kustomize overlays
+
+## Future Direction
+
+- Add richer metadata inspection in the log detail experience
+- Add charts and summaries once metrics endpoints exist
+- Add frontend linting/formatting checks to CI
+- Integrate authenticated user flows when platform auth is introduced
 
 ## Local Development
 

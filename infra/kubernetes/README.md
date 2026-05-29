@@ -157,5 +157,31 @@ Known follow-up areas:
 - Replace placeholder production image tags with immutable release tags.
 - Decide whether Postgres should be managed outside the cluster.
 - Add ingress or gateway routing for public traffic.
-- Add database migrations instead of relying on application startup table creation.
+- Run database migrations through a Kubernetes Job or CI/CD-controlled migration step before rolling out app pods.
 - Add CI/CD automation for image builds, scans, pushes, and deployment.
+- Add namespaces, RBAC, NetworkPolicies, container hardening, TLS, and production ingress/cert management.
+- Add observability resources such as metrics scraping, dashboards, alerts, and eventually tracing.
+
+## Database Migrations
+
+The `log-service` uses Alembic migrations. Application pods should not create or mutate database tables during startup.
+
+Future production rollout shape:
+
+```text
+CI builds log-service image
+-> CI pushes immutable image tag
+-> CI runs a Kubernetes migration Job with that same image tag
+-> Job runs alembic upgrade head
+-> Job reads DATABASE_URL from Secret log-service-db
+-> CI rolls out the log-service Deployment after the Job succeeds
+```
+
+The migration Job should use the same Secret contract as the app:
+
+```text
+Secret: log-service-db
+Key: DATABASE_URL
+```
+
+Because Kubernetes Jobs are run-to-completion resources, CI/CD should either create release-specific Job names or clean up old migration Jobs before creating a new one.

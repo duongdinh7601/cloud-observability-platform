@@ -8,6 +8,7 @@ It is designed as an internal backend service that can be run locally, tested in
 
 - Accept log entries through `POST /logs`
 - Return logs through `GET /logs`
+- Store optional structured log metadata in PostgreSQL `JSONB`
 - Support cursor pagination, filtering, and stable newest-first ordering
 - Expose operational health endpoints for container readiness and liveness
 
@@ -50,6 +51,7 @@ It is designed as an internal backend service that can be run locally, tested in
 - Liveness stays lightweight and process-focused
 - CORS is only enabled when origins are explicitly configured
 - Kubernetes injects `DATABASE_URL` from a Secret and routes traffic through an internal ClusterIP Service
+- Database schema changes are managed by Alembic migrations, not by application startup
 
 ## Local Development
 
@@ -96,6 +98,12 @@ When `DATABASE_URL` is omitted for local-only usage, the service falls back to t
 
 The service uses Alembic to manage database schema changes. The FastAPI app does not create tables automatically on startup; schema changes should be applied intentionally through migrations.
 
+Migration files live in:
+
+```text
+services/log-service/migrations/
+```
+
 Run migration commands from the service directory:
 
 ```bash
@@ -116,6 +124,18 @@ alembic revision --autogenerate -m "describe schema change"
 
 Review generated migration files before applying them. Autogeneration is a starting point, not a substitute for understanding the schema change.
 
+Current migrations:
+
+- create the initial `logs` table and query indexes
+- add nullable `metadata` storage as PostgreSQL `JSONB`
+
+Future Kubernetes/CI direction:
+
+- build and push the `log-service` image
+- run `alembic upgrade head` in a Kubernetes Job using the same image tag
+- inject `DATABASE_URL` from the `log-service-db` Secret
+- only roll out new app pods after the migration Job succeeds
+
 ## Testing
 
 Run the integration tests with:
@@ -124,7 +144,13 @@ Run the integration tests with:
 pytest
 ```
 
-The test suite uses a dedicated test database and dependency overrides so API behavior can be verified without touching the development database.
+The test suite uses a dedicated test database, resets it behind a test-database guard, runs Alembic migrations to `head`, and overrides FastAPI's database dependency so API behavior can be verified without touching the development database.
+
+The current tests verify:
+
+- empty log list behavior
+- cursor pagination stability
+- metadata round-tripping through `POST /logs` and `GET /logs`
 
 ## Local Kubernetes
 
@@ -152,11 +178,12 @@ services/log-service/
 |   |-- routes.py
 |   |-- schemas.py
 |   |-- settings.py
-|-- alembic/
+|-- migrations/
 |   |-- versions/
 |-- scripts/
 |   |-- container_healthcheck.py
 |-- tests/
+|   |-- conftest.py
 |   |-- test_logs.py
 |-- Dockerfile
 |-- alembic.ini

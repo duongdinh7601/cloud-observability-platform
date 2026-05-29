@@ -11,7 +11,7 @@ The current platform centers on a log ingestion service, a Next.js dashboard, an
 - Database: PostgreSQL 16
 - Containerization: Docker, Docker Compose
 - Orchestration: Kubernetes, Kustomize
-- Future platform work: Prometheus, Grafana, CI/CD, stronger secret management
+- Future platform work: structured service logs, Prometheus, Grafana, CI/CD, stronger secret management
 
 ## Repository Layout
 
@@ -38,6 +38,7 @@ The current platform centers on a log ingestion service, a Next.js dashboard, an
 - `overlays/dev/` uses local Docker Desktop image tags for hands-on Kubernetes testing.
 - `overlays/prod/` documents the production-intent image shape for future GHCR release images.
 - The Kubernetes request path mirrors the Compose model: browser to frontend, frontend rewrite to `log-service`, log-service to `postgres`.
+- Database schema changes are managed through Alembic. A future CI/CD migration step should run migrations through a Kubernetes Job before rolling out new app pods.
 
 ## Run Modes
 
@@ -76,7 +77,18 @@ kubectl port-forward service/frontend 3000:3000
 - Phase 1: Backend log service - complete
 - Phase 2: Frontend logs dashboard - complete
 - Phase 3: Container maturity and production-like Compose path - complete for the current scope
-- Phase 4: Kubernetes deployment foundations - in progress
-- Phase 5: Platform observability with Prometheus and Grafana - planned
+- Phase 4: Kubernetes deployment foundations - complete for the current local/dev scope
+- Phase 5: Database migration workflow - complete locally and in tests; Kubernetes/CI execution strategy planned
+- Phase 6: Platform observability with structured logs, metrics, Prometheus, and Grafana - planned
+
+## Current Production-Shaped Follow-Ups
+
+- Add a Kubernetes/CI migration execution strategy using a run-to-completion Job.
+- Replace placeholder production image tags with immutable release tags.
+- Add CI/CD for tests, linting, image build, scanning, registry push, migration execution, and rollout verification.
+- Replace local Kubernetes Secrets with External Secrets Operator plus a cloud secret manager or Vault.
+- Decide on managed Postgres versus in-cluster Postgres for production.
+- Add structured logs, metrics, dashboards, alerts, and eventually distributed tracing.
+- Add Python and frontend linting/formatting automation.
 
 See [docs/roadmap.md](docs/roadmap.md) for the phase-based roadmap.

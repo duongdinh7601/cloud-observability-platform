@@ -18,8 +18,9 @@ Key outcomes:
 - `GET /logs`
 - Cursor pagination with stable ordering
 - Filtering by level, service, and time range
+- Optional structured metadata stored as PostgreSQL `JSONB`
 - Alembic migration workflow for the log schema
-- Integration tests with dependency overrides and a separate test database
+- Integration tests with dependency overrides, a separate test database, guarded reset, and Alembic-based schema setup
 
 ## Phase 2 - Frontend Logs Dashboard
 
@@ -66,7 +67,7 @@ Production follow-ups:
 
 ## Phase 4 - Kubernetes Deployment
 
-Status: In Progress
+Status: Complete for current local/dev scope
 
 Goals:
 
@@ -81,17 +82,40 @@ Key outcomes so far:
 - Readiness and liveness probes for frontend and log-service
 - Resource requests and limits for all current workloads
 - Postgres PVC for local Kubernetes storage
+- Dev overlay with local Docker Desktop image tags
+- Prod overlay with production-intent GHCR image names and placeholder release tags
+- Local Ingress for `http://cloud-observability.local`
 - Log-service schema creation moved out of application startup and into Alembic migrations
+- Alembic migration files moved to `services/log-service/migrations/`
 
 Next likely improvements:
 
 - Move raw committed Secrets to a safer secret workflow
-- Add ingress or gateway-level public routing
 - Replace placeholder production image tags with immutable release tags
 - Revisit Postgres as managed infrastructure or a StatefulSet
 - Add Kubernetes/CI migration execution workflow for deployment automation
+- Add namespaces, RBAC, NetworkPolicies, TLS, production ingress/cert management, and container hardening
 
-## Phase 5 - Platform Observability
+## Phase 5 - Database Migration Deployment Strategy
+
+Status: Planned for Kubernetes/CI
+
+Goals:
+
+- Run database migrations as a controlled deployment step
+- Avoid app pods mutating schema during startup
+- Ensure app code and schema migrations come from the same release artifact
+
+Planned shape:
+
+- Build and push the `log-service` image with an immutable release tag
+- Run a Kubernetes migration Job using the same image tag
+- Inject `DATABASE_URL` from the `log-service-db` Secret
+- Stop the rollout if the migration Job fails
+- Roll out the `log-service` Deployment only after migrations succeed
+- Use release-specific Job names or CI cleanup because Kubernetes Jobs are run-to-completion resources
+
+## Phase 6 - Platform Observability
 
 Status: Planned
 
@@ -102,11 +126,32 @@ Goals:
 
 Potential scope:
 
+- Structured service logs
+- Request logging with method, path, status, duration, and request ID
 - Prometheus metrics
 - Grafana dashboards
 - Service monitoring and alerting
+- OpenTelemetry tracing once multiple services justify it
 
-## Phase 6 - Platform Expansion
+## Phase 7 - CI/CD and Quality Automation
+
+Status: Planned
+
+Goals:
+
+- Automate validation, image builds, and deployment
+- Add repeatable quality checks across backend and frontend
+
+Potential scope:
+
+- Backend tests and future linting/formatting with Ruff or Black
+- Frontend linting and formatting with ESLint and Prettier
+- Container image builds and scans
+- Push immutable images to GHCR
+- Apply migrations and roll out Kubernetes manifests
+- Verify rollout health
+
+## Phase 8 - Platform Expansion
 
 Status: Planned
 

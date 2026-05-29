@@ -16,6 +16,9 @@ Docker Compose files currently live at the repository root, while Kubernetes res
 - Add ingress or gateway-level routing for public traffic.
 - Replace committed raw Secrets with a production secret-management workflow.
 - Move production image tags to immutable release versions.
+- Add CI/CD-driven database migration execution before application rollouts.
+- Add platform observability infrastructure for metrics, dashboards, alerts, and tracing.
+- Add linting/formatting and validation checks to CI.
 - Keep infrastructure concerns separate from service application code.
 
 See [kubernetes/README.md](kubernetes/README.md) for Kubernetes commands and structure.

@@ -15,6 +15,8 @@ It is not part of the active Compose stack yet, but the directory exists as a pl
 - Directory scaffold exists
 - Service is not implemented yet
 - Service is not part of current container orchestration
+- The current request path uses the Next.js frontend rewrite directly to `log-service`
+- A gateway should only be added when the platform has enough backend services or cross-cutting policy needs to justify it
 
 ## Future Direction
 
@@ -24,3 +26,4 @@ If the platform grows to include metrics, alerts, or additional internal service
 - auth and authorization
 - request shaping
 - shared response policies
+- rate limiting, API keys, or tenant-aware routing
