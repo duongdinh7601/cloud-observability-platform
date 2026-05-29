@@ -1,53 +1,12 @@
-from pathlib import Path
-
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from alembic import command
-from alembic.config import Config
-
-from app.settings import TEST_DATABASE_URL
-from app.main import app
-from app.database import get_db
 from app.models import Log
 
-assert TEST_DATABASE_URL, "TEST_DATABASE_URL is not set"
-
-engine = create_engine(TEST_DATABASE_URL)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Run Alembic migrations against the test database before tests use it
-def run_migrations():
-    service_root = Path(__file__).resolve().parents[1]
-    alembic_cfg = Config(str(service_root / "alembic.ini"))
-    alembic_cfg.set_main_option("sqlalchemy.url", TEST_DATABASE_URL)
-    command.upgrade(alembic_cfg, "head")
-
-# Build the test database schema through Alembic, matching production's schema path
-run_migrations()
-
-
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-app.dependency_overrides[get_db] = override_get_db
-
-client = TestClient(app)
-
-def test_get_logs_empty():
-    with TestingSessionLocal() as db:
+def test_get_logs_empty(client, testing_session_local):
+    with testing_session_local() as db:
         db.query(Log).delete()
         db.commit()
         
     response = client.get("/logs")
 
-    print(response.json())
     assert response.status_code == 200
 
     data = response.json()
@@ -60,9 +19,10 @@ def test_get_logs_empty():
 
     assert data["next_cursor"] is None
 
-def test_cursor_pagination_two_logs():
+
+def test_cursor_pagination_two_logs(client, testing_session_local):
     # Clean table
-    with TestingSessionLocal() as db:
+    with testing_session_local() as db:
         db.query(Log).delete()
         db.commit()
 
@@ -71,13 +31,13 @@ def test_cursor_pagination_two_logs():
         "timestamp": "2026-01-01T00:00:02Z",
         "level": "INFO",
         "service_name": "auth",
-        "message": "second"
+        "message": "second",
     }
     log2 = {
         "timestamp": "2026-01-01T00:00:01Z",
         "level": "INFO",
         "service_name": "auth",
-        "message": "first"
+        "message": "first",
     }
 
     r1 = client.post("/logs", json=log1)
@@ -110,14 +70,14 @@ def test_cursor_pagination_two_logs():
     assert id_page1 != id_page2
 
 
-def test_log_with_metadata():
-    with TestingSessionLocal() as db:
+def test_log_with_metadata(client, testing_session_local):
+    with testing_session_local() as db:
         db.query(Log).delete()
         db.commit()
 
     metadata = {
         "request_id": "req-123",
-        "duration_ms": 67
+        "duration_ms": 67,
     }
     log_with_metadata = {
         "timestamp": "2026-01-01T00:00:02Z",
