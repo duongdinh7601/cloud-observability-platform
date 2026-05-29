@@ -133,6 +133,107 @@ Potential scope:
 - Service monitoring and alerting
 - OpenTelemetry tracing once multiple services justify it
 
+### Phase 6.1 - Structured Operational Logs
+
+Goal:
+
+- Make `log-service` emit machine-readable logs about its own runtime behavior.
+
+Planned scope:
+
+- Add FastAPI middleware for request logging
+- Emit one JSON log line per non-health request
+- Include method, path, status code, duration, and error context when applicable
+- Keep logs on stdout/stderr so Docker and Kubernetes can collect them
+- Skip or downgrade high-frequency health probe logs to reduce noise
+
+Production follow-ups:
+
+- Standardize JSON log fields across services
+- Add request IDs and correlation IDs
+- Decide later whether the platform should ingest its own operational logs
+
+### Phase 6.2 - Request IDs
+
+Goal:
+
+- Correlate operational logs from the same request.
+
+Planned scope:
+
+- Accept an incoming `X-Request-ID` header when present
+- Generate a request ID when one is missing
+- Return the request ID in the response headers
+- Include the request ID in operational logs
+- Pass request IDs through frontend-to-backend calls where appropriate
+
+### Phase 6.3 - Metrics Endpoint
+
+Goal:
+
+- Expose aggregate service health signals.
+
+Planned scope:
+
+- Add Prometheus-compatible metrics
+- Expose a `/metrics` endpoint
+- Track request count
+- Track request duration
+- Track error count
+- Track log ingestion count
+
+### Phase 6.4 - Kubernetes Metrics Scraping
+
+Goal:
+
+- Prepare local Kubernetes to collect service metrics.
+
+Planned scope:
+
+- Add Prometheus or kube-prometheus-stack later
+- Choose scrape annotations or ServiceMonitor depending on the monitoring stack
+- Keep local development setup understandable before adding production-grade monitoring complexity
+
+### Phase 6.5 - Grafana Dashboards
+
+Goal:
+
+- Visualize platform behavior.
+
+Planned scope:
+
+- Request rate
+- Error rate
+- Latency percentiles
+- Logs ingested over time
+- Health and readiness status
+
+### Phase 6.6 - Alerts
+
+Goal:
+
+- Detect platform problems automatically.
+
+Potential alerts:
+
+- high 5xx rate
+- high request latency
+- `log-service` unavailable
+- Postgres readiness failures
+- unexpected ingestion volume drops
+
+### Phase 6.7 - Tracing
+
+Goal:
+
+- Follow requests across service boundaries once the platform has enough services to justify distributed tracing.
+
+Planned scope:
+
+- Add OpenTelemetry instrumentation
+- Trace frontend-to-backend request paths where practical
+- Expand tracing when additional backend services are introduced
+
 ## Phase 7 - CI/CD and Quality Automation
 
 Status: Planned

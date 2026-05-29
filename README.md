@@ -81,6 +81,8 @@ kubectl port-forward service/frontend 3000:3000
 - Phase 5: Database migration workflow - complete locally and in tests; Kubernetes/CI execution strategy planned
 - Phase 6: Platform observability with structured logs, metrics, Prometheus, and Grafana - planned
 
+The next implementation phase starts with structured operational logs from `log-service`: JSON request logs for normal API traffic, reduced health-check noise, and later request IDs, metrics, dashboards, alerts, and tracing.
+
 ## Current Production-Shaped Follow-Ups
 
 - Add a Kubernetes/CI migration execution strategy using a run-to-completion Job.

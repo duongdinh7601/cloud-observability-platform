@@ -53,6 +53,13 @@ It is designed as an internal backend service that can be run locally, tested in
 - Kubernetes injects `DATABASE_URL` from a Secret and routes traffic through an internal ClusterIP Service
 - Database schema changes are managed by Alembic migrations, not by application startup
 
+### Observability Direction
+
+- Emit structured JSON operational logs from the service itself
+- Start with request logging middleware for normal API traffic
+- Skip or reduce health-check log noise
+- Add request IDs, Prometheus metrics, dashboards, alerts, and tracing in later observability steps
+
 ## Local Development
 
 1. Move into the service directory:
