@@ -6,6 +6,18 @@ from fastapi import FastAPI, Request
 
 request_logger = logging.getLogger("log_service.request")
 
+# Set log level for now until service-wide logging configuration is added
+request_logger.setLevel(logging.INFO)
+
+# Local JSON log handler until service-wide logging configuration is added
+if not request_logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    request_logger.addHandler(handler)
+
+request_logger.propagate = False
+
+
 HEALTH_PATHS = {"/health/live", "/health/ready"}
 
 
