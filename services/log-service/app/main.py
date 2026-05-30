@@ -4,8 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.settings import CORS_ORIGINS
 from app.routes import router as logs_router
 from app.health import router as health_router
+from app.middleware import add_request_logging_middleware
 
 app = FastAPI(title="Log Service")
+
+add_request_logging_middleware(app)
 
 if CORS_ORIGINS:
     # Restrict browser access to known frontend origins instead of allowing all cross-origin requests.
