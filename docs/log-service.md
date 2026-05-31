@@ -136,6 +136,26 @@ Notes:
 - If one cursor field is provided, both `cursor_ts` and `cursor_id` are required.
 - `start_time` must be less than or equal to `end_time` when both are provided.
 
+### `GET /metrics`
+
+Exposes Prometheus-format service metrics.
+
+This endpoint is intended for Prometheus or compatible monitoring tools, not the frontend dashboard. It returns text exposition format rather than JSON.
+
+Current custom metrics:
+
+| Metric | Type | Purpose |
+| --- | --- | --- |
+| `log_service_http_requests_total` | counter | Counts HTTP requests by method, path, and status code |
+| `log_service_http_request_duration_seconds` | histogram | Measures HTTP request duration by method, path, and status code |
+| `log_service_logs_ingested_total` | counter | Counts successfully ingested log entries |
+
+Notes:
+
+- Duration metrics use seconds to match Prometheus conventions.
+- Individual request IDs are not metric labels because they would create high-cardinality time series.
+- The `/metrics` endpoint may later be excluded from request metrics or filtered in dashboards if scrape traffic becomes noisy.
+
 ---
 
 ## Database Migrations
@@ -168,6 +188,8 @@ Current behavior:
 - request logs include `event`, `request_id`, `method`, `path`, `status_code`, and `duration_ms`
 - unhandled exceptions produce an `http_request_error` log with error type and message before the exception is re-raised
 - handled responses include `X-Request-ID`
+- HTTP request metrics and request-duration metrics are recorded for normal and exception paths
+- successful `POST /logs` writes increment the log ingestion counter
 
 Example request log:
 

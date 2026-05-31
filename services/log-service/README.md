@@ -21,6 +21,7 @@ It is designed as an internal backend service that can be run locally, tested in
 - Alembic
 - PostgreSQL
 - psycopg v3
+- prometheus-client
 - pytest
 
 ## API Surface
@@ -29,6 +30,7 @@ It is designed as an internal backend service that can be run locally, tested in
 - `GET /logs`
 - `GET /health/live`
 - `GET /health/ready`
+- `GET /metrics`
 
 ## Key Behaviors
 
@@ -61,7 +63,25 @@ It is designed as an internal backend service that can be run locally, tested in
 - Returns `X-Request-ID` on handled responses so clients can correlate requests with backend logs
 - Skips health-check request logs to reduce probe noise
 - Uses a local logger handler for now; future work should move logging setup into service-wide JSON logging configuration
-- Prometheus metrics, dashboards, alerts, and tracing are later observability steps
+- Exposes Prometheus metrics at `/metrics`
+- Tracks HTTP request count, HTTP request duration, and successful log ingestion count
+- Kubernetes scraping, dashboards, alerts, and tracing are later observability steps
+
+### Metrics
+
+The service exposes Prometheus-format metrics at:
+
+```text
+GET /metrics
+```
+
+Current custom metrics:
+
+- `log_service_http_requests_total`
+- `log_service_http_request_duration_seconds`
+- `log_service_logs_ingested_total`
+
+The HTTP request metrics use `method`, `path`, and `status_code` labels. Request IDs are intentionally kept out of metric labels to avoid high-cardinality time series.
 
 ## Local Development
 

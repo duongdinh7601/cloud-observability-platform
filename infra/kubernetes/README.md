@@ -160,7 +160,7 @@ Known follow-up areas:
 - Run database migrations through a Kubernetes Job or CI/CD-controlled migration step before rolling out app pods.
 - Add CI/CD automation for image builds, scans, pushes, and deployment.
 - Add namespaces, RBAC, NetworkPolicies, container hardening, TLS, and production ingress/cert management.
-- Add observability resources such as metrics scraping, dashboards, alerts, and eventually tracing.
+- Add observability resources such as metrics scraping for `log-service` `/metrics`, dashboards, alerts, and eventually tracing.
 - Centralize service-wide JSON logging configuration while keeping container logs one JSON object per line where practical.
 
 ## Database Migrations

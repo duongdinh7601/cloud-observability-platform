@@ -11,7 +11,7 @@ The current platform centers on a log ingestion service, a Next.js dashboard, an
 - Database: PostgreSQL 16
 - Containerization: Docker, Docker Compose
 - Orchestration: Kubernetes, Kustomize
-- Future platform work: Prometheus, Grafana, CI/CD, stronger secret management
+- Future platform work: Grafana, CI/CD, stronger secret management
 
 ## Repository Layout
 
@@ -79,9 +79,9 @@ kubectl port-forward service/frontend 3000:3000
 - Phase 3: Container maturity and production-like Compose path - complete for the current scope
 - Phase 4: Kubernetes deployment foundations - complete for the current local/dev scope
 - Phase 5: Database migration workflow - complete locally and in tests; Kubernetes/CI execution strategy planned
-- Phase 6: Platform observability - in progress; structured request logs and request IDs are implemented for `log-service`
+- Phase 6: Platform observability - in progress; structured request logs, request IDs, and a Prometheus `/metrics` endpoint are implemented for `log-service`
 
-The current observability slice emits JSON request logs from `log-service`, skips health-check log noise, and correlates handled responses with `X-Request-ID`. Next observability work includes metrics, dashboards, alerts, tracing, and centralized service-wide logging configuration.
+The current observability slice emits JSON request logs from `log-service`, skips health-check log noise, correlates handled responses with `X-Request-ID`, and exposes Prometheus metrics for HTTP requests, request duration, and log ingestion. Next observability work includes Kubernetes metrics scraping, dashboards, alerts, tracing, and centralized service-wide logging configuration.
 
 ## Current Production-Shaped Follow-Ups
 
@@ -90,7 +90,7 @@ The current observability slice emits JSON request logs from `log-service`, skip
 - Add CI/CD for tests, linting, image build, scanning, registry push, migration execution, and rollout verification.
 - Replace local Kubernetes Secrets with External Secrets Operator plus a cloud secret manager or Vault.
 - Decide on managed Postgres versus in-cluster Postgres for production.
-- Add metrics, dashboards, alerts, and eventually distributed tracing.
+- Add Kubernetes metrics scraping, dashboards, alerts, and eventually distributed tracing.
 - Replace the temporary middleware-local log handler with centralized service-wide JSON logging configuration.
 - Add Python and frontend linting/formatting automation.
 

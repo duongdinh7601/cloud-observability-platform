@@ -11,6 +11,7 @@ Docker Compose files currently live at the repository root, while Kubernetes res
 - `infra/kubernetes/overlays/dev/` adapts the base for local Docker Desktop Kubernetes.
 - `infra/kubernetes/overlays/prod/` captures production-intent image references for a future release workflow.
 - The `log-service` now emits structured JSON request logs to stdout/stderr for container log collection.
+- The `log-service` exposes Prometheus-format metrics at `/metrics`; cluster scraping is a future infrastructure step.
 
 ## Planned Direction
 

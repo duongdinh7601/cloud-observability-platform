@@ -179,11 +179,13 @@ Future scope:
 
 ### Phase 6.3 - Metrics Endpoint
 
+Status: Complete for the first `log-service` slice
+
 Goal:
 
 - Expose aggregate service health signals.
 
-Planned scope:
+Completed scope:
 
 - Add Prometheus-compatible metrics
 - Expose a `/metrics` endpoint
@@ -191,6 +193,12 @@ Planned scope:
 - Track request duration
 - Track error count
 - Track log ingestion count
+
+Production follow-ups:
+
+- Decide whether to exclude `/metrics` from request logs/request metrics, or filter it in dashboards, if scrape traffic becomes noisy
+- Add tests for metrics output and ingestion counter behavior when metrics become a stronger service contract
+- Add Kubernetes scrape configuration in the next observability phase
 
 ### Phase 6.4 - Kubernetes Metrics Scraping
 
