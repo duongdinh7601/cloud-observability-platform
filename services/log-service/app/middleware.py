@@ -5,6 +5,8 @@ import uuid
 
 from fastapi import FastAPI, Request
 
+from app.metrics import record_http_request_metrics
+
 request_logger = logging.getLogger("log_service.request")
 
 # Set log level for now until service-wide logging configuration is added
@@ -45,13 +47,16 @@ def add_request_logging_middleware(app: FastAPI) -> None:
             response = await call_next(request)
             response.headers[REQUEST_ID_HEADER] = request_id
         except Exception as exc:
-            duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
+            duration_seconds = time.perf_counter() - start_time
+            duration_ms = round(duration_seconds * 1000, 2)
+            method = request.method
+            path = request.url.path
 
             error_log_record = {
                 "event": "http_request_error",
                 "request_id": request_id,
-                "method": request.method,
-                "path": request.url.path,
+                "method": method,
+                "path": path,
                 "status_code": 500,
                 "duration_ms": duration_ms,
                 "error_type": type(exc).__name__,
@@ -60,19 +65,27 @@ def add_request_logging_middleware(app: FastAPI) -> None:
 
             request_logger.exception(json.dumps(error_log_record, sort_keys=True))
 
+            record_http_request_metrics(method, path, 500, duration_seconds)
+
             raise
 
-        duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
+        duration_seconds = time.perf_counter() - start_time
+        duration_ms = round(duration_seconds * 1000, 2)
+        status_code = response.status_code
+        method = request.method
+        path = request.url.path
 
         log_record = {
             "event": "http_request",
             "request_id": request_id,
-            "method": request.method,
-            "path": request.url.path,
-            "status_code": response.status_code,
+            "method": method,
+            "path": path,
+            "status_code": status_code,
             "duration_ms": duration_ms,
         }
 
         request_logger.info(json.dumps(log_record, sort_keys=True))
+
+        record_http_request_metrics(method, path, status_code, duration_seconds)
 
         return response

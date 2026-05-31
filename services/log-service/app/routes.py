@@ -5,6 +5,7 @@ from app.database import get_db
 from app.models import Log
 from app.schemas import LogEntry, LogListResponse, LogResponse, LogLevel, CursorResponse
 from app.dependencies import parse_level, resolve_cursor
+from app.metrics import record_log_ingested
 from typing import Optional, Tuple
 from datetime import datetime
 
@@ -24,6 +25,8 @@ def create_log(log: LogEntry, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_log)
 
+    record_log_ingested()
+
     return db_log
 
 @router.get("/logs", response_model=LogListResponse)
@@ -35,7 +38,7 @@ def get_logs(
     start_time: Optional[datetime]=None,
     end_time: Optional[datetime]=None,
     db: Session = Depends(get_db)
-    ):
+):
 
     # Order newest-first and use id as a tie-breaker so pagination stays stable
     # even when multiple logs share the same timestamp.

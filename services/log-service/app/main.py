@@ -5,6 +5,7 @@ from app.settings import CORS_ORIGINS
 from app.routes import router as logs_router
 from app.health import router as health_router
 from app.middleware import add_request_logging_middleware
+from app.metrics import router as metrics_router
 
 app = FastAPI(title="Log Service")
 
@@ -22,3 +23,4 @@ if CORS_ORIGINS:
 
 app.include_router(logs_router)
 app.include_router(health_router, prefix="/health")
+app.include_router(metrics_router)
