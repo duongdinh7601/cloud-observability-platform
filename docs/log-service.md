@@ -35,6 +35,8 @@ The Python ORM attribute for the database `metadata` column is `log_metadata` to
 
 ## API Endpoints
 
+Handled API responses include an `X-Request-ID` header. If a request provides `X-Request-ID`, the service preserves it; otherwise the service generates one. The same value appears in structured operational request logs so a response can be correlated with backend behavior.
+
 ### `POST /logs`
 
 Creates a new log entry.
@@ -152,6 +154,40 @@ Current migration history:
 - `cc18b0f81e9b_add_log_metadata.py` adds nullable `metadata` JSONB storage.
 
 Future production rollout should run migrations in a controlled CI/CD step, likely through a Kubernetes Job using the same `log-service` image tag as the app rollout.
+
+---
+
+## Operational Logs
+
+The service emits structured JSON logs about its own HTTP request handling. These are operational logs from the platform service, not product log entries stored in the `logs` table.
+
+Current behavior:
+
+- non-health HTTP requests produce one JSON request log
+- health endpoints are skipped to reduce Kubernetes probe noise
+- request logs include `event`, `request_id`, `method`, `path`, `status_code`, and `duration_ms`
+- unhandled exceptions produce an `http_request_error` log with error type and message before the exception is re-raised
+- handled responses include `X-Request-ID`
+
+Example request log:
+
+```json
+{
+  "duration_ms": 12.34,
+  "event": "http_request",
+  "method": "GET",
+  "path": "/logs",
+  "request_id": "req-123",
+  "status_code": 200
+}
+```
+
+Current production-shaped follow-ups:
+
+- replace the middleware-local logger handler with centralized service-wide JSON logging configuration
+- consider filtering noisy paths such as `/favicon.ico` and CORS `OPTIONS` preflight requests
+- add request logging tests when request ID behavior becomes a stronger contract
+- decide later whether the platform should ingest its own operational logs
 
 ---
 

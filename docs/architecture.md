@@ -25,6 +25,7 @@ The Cloud Observability Platform is a full-stack, cloud-native project designed 
 
 2. **Backend Services**
    - `Log Service` receives log entries, validates requests, stores logs and optional metadata, and returns cursor-paginated results
+   - `Log Service` emits structured JSON operational logs for non-health HTTP requests and uses `X-Request-ID` for request correlation
    - `API Gateway` is planned for a future phase when the platform has enough services to justify a dedicated backend boundary
 
 3. **Database**
@@ -63,4 +64,4 @@ postgres:5432
 - Each application service is independently containerized.
 - Modular design allows future services such as metrics, alerts, or a gateway to be added deliberately.
 - The project favors production-shaped decisions while keeping early implementations understandable.
-- The next observability phase should start with structured service logs, then add metrics, dashboards, alerts, and eventually tracing.
+- The observability phase has started with structured `log-service` request logs and request IDs; next steps include metrics, dashboards, alerts, centralized logging configuration, and eventually tracing.

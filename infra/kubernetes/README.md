@@ -161,6 +161,7 @@ Known follow-up areas:
 - Add CI/CD automation for image builds, scans, pushes, and deployment.
 - Add namespaces, RBAC, NetworkPolicies, container hardening, TLS, and production ingress/cert management.
 - Add observability resources such as metrics scraping, dashboards, alerts, and eventually tracing.
+- Centralize service-wide JSON logging configuration while keeping container logs one JSON object per line where practical.
 
 ## Database Migrations
 

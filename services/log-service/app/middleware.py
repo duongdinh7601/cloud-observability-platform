@@ -24,6 +24,8 @@ REQUEST_ID_HEADER = "X-Request-ID"
 
 
 def add_request_logging_middleware(app: FastAPI) -> None:
+    """Log non-health HTTP requests and attach an X-Request-ID for correlation."""
+
     @app.middleware("http")
     async def request_logging_middleware(request: Request, call_next):
         if request.url.path in HEALTH_PATHS:

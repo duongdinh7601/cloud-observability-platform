@@ -117,7 +117,7 @@ Planned shape:
 
 ## Phase 6 - Platform Observability
 
-Status: Planned
+Status: In Progress
 
 Goals:
 
@@ -135,37 +135,47 @@ Potential scope:
 
 ### Phase 6.1 - Structured Operational Logs
 
+Status: Complete for the first `log-service` slice
+
 Goal:
 
 - Make `log-service` emit machine-readable logs about its own runtime behavior.
 
-Planned scope:
+Completed scope:
 
-- Add FastAPI middleware for request logging
-- Emit one JSON log line per non-health request
-- Include method, path, status code, duration, and error context when applicable
-- Keep logs on stdout/stderr so Docker and Kubernetes can collect them
-- Skip or downgrade high-frequency health probe logs to reduce noise
+- Added FastAPI middleware for request logging
+- Emits one JSON log line per non-health request
+- Includes method, path, status code, duration, and error context when applicable
+- Keeps logs on stdout/stderr so Docker and Kubernetes can collect them
+- Skips high-frequency health probe logs to reduce noise
 
 Production follow-ups:
 
 - Standardize JSON log fields across services
-- Add request IDs and correlation IDs
+- Replace the temporary middleware-local log handler with centralized service-wide JSON logging configuration
+- Consider filtering or downgrading noisy browser/CORS paths such as `/favicon.ico` and `OPTIONS`
 - Decide later whether the platform should ingest its own operational logs
 
 ### Phase 6.2 - Request IDs
+
+Status: Complete for `log-service` handled HTTP responses
 
 Goal:
 
 - Correlate operational logs from the same request.
 
-Planned scope:
+Completed scope:
 
 - Accept an incoming `X-Request-ID` header when present
 - Generate a request ID when one is missing
 - Return the request ID in the response headers
 - Include the request ID in operational logs
+
+Future scope:
+
 - Pass request IDs through frontend-to-backend calls where appropriate
+- Add tests for request ID log/header behavior when logging becomes a stronger service contract
+- Decide whether centralized exception handling should attach `X-Request-ID` to unhandled error responses
 
 ### Phase 6.3 - Metrics Endpoint
 
