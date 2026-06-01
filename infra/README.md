@@ -1,17 +1,26 @@
 # Infrastructure
 
-The `infra/` directory is reserved for infrastructure artifacts that sit outside the application source code.
+The `infra/` directory contains infrastructure artifacts that sit outside the application source code.
 
-At the current stage of the project, the active Docker Compose files live at the repository root, while `infra/` is primarily a placeholder for future Kubernetes and infrastructure-specific assets.
+Docker Compose files currently live at the repository root, while Kubernetes resources live under `infra/kubernetes/`.
 
 ## Current State
 
-- Root-level Compose files drive local development and production-like container workflows
-- `infra/docker/` is reserved for future Docker-related infrastructure assets if the platform grows beyond the current layout
-- `infra/kubernetes/` is reserved for future manifests and deployment resources
+- Root-level Compose files drive local development and production-like container workflows.
+- `infra/kubernetes/base/` contains shared Kubernetes manifests.
+- `infra/kubernetes/overlays/dev/` adapts the base for local Docker Desktop Kubernetes.
+- `infra/kubernetes/overlays/prod/` captures production-intent image references for a future release workflow.
+- The `log-service` now emits structured JSON request logs to stdout/stderr for container log collection.
+- The `log-service` exposes Prometheus-format metrics at `/metrics`; cluster scraping is a future infrastructure step.
 
 ## Planned Direction
 
-- Add Kubernetes manifests for frontend, log-service, and supporting infrastructure
-- Add production deployment resources such as ConfigMaps, Secrets, and ingress definitions
-- Keep infrastructure concerns separate from service application code
+- Add ingress or gateway-level routing for public traffic.
+- Replace committed raw Secrets with a production secret-management workflow.
+- Move production image tags to immutable release versions.
+- Add CI/CD-driven database migration execution before application rollouts.
+- Add platform observability infrastructure for metrics, dashboards, alerts, and tracing.
+- Add linting/formatting and validation checks to CI.
+- Keep infrastructure concerns separate from service application code.
+
+See [kubernetes/README.md](kubernetes/README.md) for Kubernetes commands and structure.

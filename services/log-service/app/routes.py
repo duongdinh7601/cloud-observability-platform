@@ -3,25 +3,29 @@ from sqlalchemy import func, and_, or_
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Log
-from app.schemas import LogEntry, LogListResponse, LogLevel, CursorResponse
+from app.schemas import LogEntry, LogListResponse, LogResponse, LogLevel, CursorResponse
 from app.dependencies import parse_level, resolve_cursor
+from app.metrics import record_log_ingested
 from typing import Optional, Tuple
 from datetime import datetime
 
 router = APIRouter(tags=["logs"])
 
-@router.post("/logs", status_code=201)
+@router.post("/logs", status_code=201, response_model=LogResponse)
 def create_log(log: LogEntry, db: Session = Depends(get_db)):
     db_log = Log(
         timestamp=log.timestamp,
         level=log.level,
         service_name=log.service_name,
         message=log.message,
+        log_metadata=log.metadata,
     )
 
     db.add(db_log)
     db.commit()
     db.refresh(db_log)
+
+    record_log_ingested()
 
     return db_log
 
@@ -34,7 +38,7 @@ def get_logs(
     start_time: Optional[datetime]=None,
     end_time: Optional[datetime]=None,
     db: Session = Depends(get_db)
-    ):
+):
 
     # Order newest-first and use id as a tie-breaker so pagination stays stable
     # even when multiple logs share the same timestamp.
