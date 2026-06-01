@@ -11,7 +11,8 @@ Docker Compose files currently live at the repository root, while Kubernetes res
 - `infra/kubernetes/overlays/dev/` adapts the base for local Docker Desktop Kubernetes.
 - `infra/kubernetes/overlays/prod/` captures production-intent image references for a future release workflow.
 - The `log-service` now emits structured JSON request logs to stdout/stderr for container log collection.
-- The `log-service` exposes Prometheus-format metrics at `/metrics`; cluster scraping is a future infrastructure step.
+- The `log-service` exposes Prometheus-format metrics at `/metrics`.
+- The dev Kubernetes overlay includes a lightweight Prometheus deployment that scrapes `log-service:8000/metrics`.
 
 ## Planned Direction
 
@@ -19,7 +20,7 @@ Docker Compose files currently live at the repository root, while Kubernetes res
 - Replace committed raw Secrets with a production secret-management workflow.
 - Move production image tags to immutable release versions.
 - Add CI/CD-driven database migration execution before application rollouts.
-- Add platform observability infrastructure for metrics, dashboards, alerts, and tracing.
+- Replace the lightweight dev Prometheus setup with production monitoring infrastructure, then add dashboards, alerts, and tracing.
 - Add linting/formatting and validation checks to CI.
 - Keep infrastructure concerns separate from service application code.
 

@@ -202,15 +202,25 @@ Production follow-ups:
 
 ### Phase 6.4 - Kubernetes Metrics Scraping
 
+Status: Complete for local/dev Prometheus
+
 Goal:
 
 - Prepare local Kubernetes to collect service metrics.
 
-Planned scope:
+Completed scope:
 
-- Add Prometheus or kube-prometheus-stack later
-- Choose scrape annotations or ServiceMonitor depending on the monitoring stack
-- Keep local development setup understandable before adding production-grade monitoring complexity
+- Added a dev-overlay Prometheus Deployment, ConfigMap, and ClusterIP Service
+- Configured Prometheus to scrape `log-service:8000` at `/metrics`
+- Verified `up{job="log-service"}` and `log_service_http_requests_total` in the Prometheus UI
+- Kept the setup local/dev focused instead of adding production Prometheus Operator complexity
+
+Production follow-ups:
+
+- Choose kube-prometheus-stack, Prometheus Operator, or managed monitoring for production
+- Add scrape annotations or ServiceMonitor resources depending on the chosen stack
+- Decide whether `/metrics` scrape traffic should be excluded from request metrics or filtered in dashboards
+- Run Kubernetes database migrations before relying on ingestion metrics from `POST /logs` in cluster
 
 ### Phase 6.5 - Grafana Dashboards
 

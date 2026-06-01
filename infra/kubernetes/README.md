@@ -67,6 +67,48 @@ kubectl get services
 kubectl get pvc
 ```
 
+## Local Prometheus
+
+The dev overlay includes a lightweight Prometheus Deployment for local learning and metrics verification.
+
+It uses:
+
+- `prometheus-config` ConfigMap for `prometheus.yml`
+- `prom/prometheus:v2.53.4`
+- a `ClusterIP` Service named `prometheus`
+- a scrape target of `log-service:8000` with `metrics_path: /metrics`
+
+Apply the dev overlay:
+
+```powershell
+kubectl apply -k infra/kubernetes/overlays/dev
+```
+
+Open Prometheus locally with port-forwarding:
+
+```powershell
+kubectl port-forward service/prometheus 9090:9090
+```
+
+Then open:
+
+```text
+http://127.0.0.1:9090
+```
+
+Useful queries:
+
+```text
+up{job="log-service"}
+log_service_http_requests_total
+log_service_http_request_duration_seconds_count
+log_service_logs_ingested_total
+```
+
+If `up{job="log-service"}` is `0`, check the Prometheus target error under **Status -> Targets**. A `404` usually means the Kubernetes `log-service:k8s-dev` image is stale and needs to be rebuilt.
+
+Successful `POST /logs` ingestion in Kubernetes depends on the database schema being migrated. Until the migration Job strategy is implemented, the ingestion counter may remain `0` in cluster even when Prometheus scraping is healthy.
+
 ## Local Ingress
 
 The dev overlay includes an Ingress for the frontend:
@@ -160,7 +202,8 @@ Known follow-up areas:
 - Run database migrations through a Kubernetes Job or CI/CD-controlled migration step before rolling out app pods.
 - Add CI/CD automation for image builds, scans, pushes, and deployment.
 - Add namespaces, RBAC, NetworkPolicies, container hardening, TLS, and production ingress/cert management.
-- Add observability resources such as metrics scraping for `log-service` `/metrics`, dashboards, alerts, and eventually tracing.
+- Replace the lightweight dev Prometheus setup with production monitoring such as kube-prometheus-stack, Prometheus Operator, or managed monitoring.
+- Add dashboards, alerts, and eventually tracing.
 - Centralize service-wide JSON logging configuration while keeping container logs one JSON object per line where practical.
 
 ## Database Migrations
