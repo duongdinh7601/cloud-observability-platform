@@ -5,6 +5,7 @@ resources:
   - ../../base
   - secrets.yaml
   - ingress.yaml
+  - prometheus.yaml
 
 images:
   - name: frontend
