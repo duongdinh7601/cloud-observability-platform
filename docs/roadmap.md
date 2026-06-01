@@ -224,17 +224,33 @@ Production follow-ups:
 
 ### Phase 6.5 - Grafana Dashboards
 
+Status: Complete for local/dev Grafana foundation
+
 Goal:
 
 - Visualize platform behavior.
 
-Planned scope:
+Completed scope:
+
+- Added a dev-overlay Grafana Deployment, datasource ConfigMap, and ClusterIP Service
+- Provisioned Grafana with a Prometheus datasource at `http://prometheus:9090`
+- Verified Grafana can query Prometheus data from local Kubernetes
+- Kept dashboards manual for now so queries and panels can be learned before codifying them
+
+Planned dashboard scope:
 
 - Request rate
 - Error rate
 - Latency percentiles
 - Logs ingested over time
 - Health and readiness status
+
+Production follow-ups:
+
+- Replace lightweight dev Grafana with kube-prometheus-stack, Grafana Operator, managed Grafana, or another production monitoring choice
+- Move Grafana admin credentials and sensitive configuration into Kubernetes Secrets or external secret management
+- Add auth, TLS, RBAC, and controlled ingress before exposing Grafana outside local dev
+- Provision dashboards as code after the first dashboard design stabilizes
 
 ### Phase 6.6 - Alerts
 

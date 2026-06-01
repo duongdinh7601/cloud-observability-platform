@@ -13,8 +13,10 @@ infra/kubernetes/
 |   |-- kustomization.yaml
 |-- overlays/
 |   |-- dev/
+|   |   |-- grafana.yaml
 |   |   |-- ingress.yaml
 |   |   |-- kustomization.yaml
+|   |   |-- prometheus.yaml
 |   |   |-- secrets.yaml
 |   |-- prod/
 |   |   |-- kustomization.yaml
@@ -109,6 +111,49 @@ If `up{job="log-service"}` is `0`, check the Prometheus target error under **Sta
 
 Successful `POST /logs` ingestion in Kubernetes depends on the database schema being migrated. Until the migration Job strategy is implemented, the ingestion counter may remain `0` in cluster even when Prometheus scraping is healthy.
 
+## Local Grafana
+
+The dev overlay includes a lightweight Grafana Deployment for local dashboard exploration.
+
+It uses:
+
+- `grafana-datasources` ConfigMap for datasource provisioning
+- `grafana/grafana:11.1.0`
+- a `ClusterIP` Service named `grafana`
+- a provisioned Prometheus datasource pointing to `http://prometheus:9090`
+
+Apply the dev overlay:
+
+```powershell
+kubectl apply -k infra/kubernetes/overlays/dev
+```
+
+Open Grafana locally with port-forwarding:
+
+```powershell
+kubectl port-forward service/grafana 3000:3000
+```
+
+Then open:
+
+```text
+http://127.0.0.1:3000
+```
+
+For local development, the default Grafana login is typically:
+
+```text
+admin / admin
+```
+
+Grafana may require a password change after first login. Production credentials must not be committed to Git; use Kubernetes Secrets, external secret management, SSO, or managed Grafana depending on the final production monitoring choice.
+
+Useful starter Explore query:
+
+```text
+up{job="log-service"}
+```
+
 ## Local Ingress
 
 The dev overlay includes an Ingress for the frontend:
@@ -202,8 +247,10 @@ Known follow-up areas:
 - Run database migrations through a Kubernetes Job or CI/CD-controlled migration step before rolling out app pods.
 - Add CI/CD automation for image builds, scans, pushes, and deployment.
 - Add namespaces, RBAC, NetworkPolicies, container hardening, TLS, and production ingress/cert management.
-- Replace the lightweight dev Prometheus setup with production monitoring such as kube-prometheus-stack, Prometheus Operator, or managed monitoring.
-- Add dashboards, alerts, and eventually tracing.
+- Replace the lightweight dev Prometheus/Grafana setup with production monitoring such as kube-prometheus-stack, Prometheus Operator, Grafana Operator, managed Prometheus, or managed Grafana.
+- Move Grafana admin credentials and other sensitive monitoring configuration into Secrets or external secret management.
+- Provision Grafana dashboards as code once the dashboard design stabilizes.
+- Add alerts and eventually tracing.
 - Centralize service-wide JSON logging configuration while keeping container logs one JSON object per line where practical.
 
 ## Database Migrations
