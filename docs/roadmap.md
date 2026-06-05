@@ -235,15 +235,21 @@ Completed scope:
 - Added a dev-overlay Grafana Deployment, datasource ConfigMap, and ClusterIP Service
 - Provisioned Grafana with a Prometheus datasource at `http://prometheus:9090`
 - Verified Grafana can query Prometheus data from local Kubernetes
-- Kept dashboards manual for now so queries and panels can be learned before codifying them
+- Built the first dashboard manually so PromQL queries and panel choices can be learned before codifying them
+- Added starter panels for recent request volume, request rate, server errors, p95 latency, and logs ingested
 
-Planned dashboard scope:
+Dashboard queries explored:
 
-- Request rate
-- Error rate
-- Latency percentiles
-- Logs ingested over time
+- `increase(log_service_http_requests_total[5m])` for local recent request volume
+- `rate(log_service_http_requests_total[5m])` for request throughput
+- `increase(log_service_http_requests_total{status_code=~"5.."}[5m])` for recent server errors
+- `histogram_quantile(0.95, ...)` over `log_service_http_request_duration_seconds_bucket` for p95 latency
+- `increase(log_service_logs_ingested_total[5m])` for recent successful log ingestion
+
+Remaining dashboard scope:
+
 - Health and readiness status
+- More polished panel legends, units, and layout
 
 Production follow-ups:
 
@@ -251,6 +257,7 @@ Production follow-ups:
 - Move Grafana admin credentials and sensitive configuration into Kubernetes Secrets or external secret management
 - Add auth, TLS, RBAC, and controlled ingress before exposing Grafana outside local dev
 - Provision dashboards as code after the first dashboard design stabilizes
+- Add Kubernetes/CI migrations before relying on ingestion metrics in deployed environments
 
 ### Phase 6.6 - Alerts
 

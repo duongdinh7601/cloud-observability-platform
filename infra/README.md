@@ -13,6 +13,7 @@ Docker Compose files currently live at the repository root, while Kubernetes res
 - The `log-service` now emits structured JSON request logs to stdout/stderr for container log collection.
 - The `log-service` exposes Prometheus-format metrics at `/metrics`.
 - The dev Kubernetes overlay includes lightweight Prometheus and Grafana deployments for local metrics scraping and visualization.
+- The first local Grafana dashboard panels cover request volume, request rate, server errors, p95 latency, and log ingestion.
 
 ## Planned Direction
 

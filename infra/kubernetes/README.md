@@ -154,6 +154,46 @@ Useful starter Explore query:
 up{job="log-service"}
 ```
 
+Starter dashboard panels:
+
+```text
+HTTP Requests In Last 5 Minutes
+sum by (method, path, status_code) (
+  increase(log_service_http_requests_total[5m])
+)
+```
+
+```text
+HTTP Request Rate
+sum by (method, path, status_code) (
+  rate(log_service_http_requests_total[5m])
+)
+```
+
+```text
+Server Errors In Last 5 Minutes
+sum by (method, path, status_code) (
+  increase(log_service_http_requests_total{status_code=~"5.."}[5m])
+)
+```
+
+```text
+p95 Request Latency
+histogram_quantile(
+  0.95,
+  sum by (le, method, path) (
+    rate(log_service_http_request_duration_seconds_bucket[5m])
+  )
+)
+```
+
+```text
+Logs Ingested In Last 5 Minutes
+increase(log_service_logs_ingested_total[5m])
+```
+
+Use broad discovery queries such as `{__name__=~"log_service_.*"}` only for exploration. Dashboard panels should use specific metric names so helper series such as `*_created` do not appear as misleading large values.
+
 ## Local Ingress
 
 The dev overlay includes an Ingress for the frontend:
@@ -276,3 +316,23 @@ Key: DATABASE_URL
 ```
 
 Because Kubernetes Jobs are run-to-completion resources, CI/CD should either create release-specific Job names or clean up old migration Jobs before creating a new one.
+
+### Local Dev Recovery: Existing Table Without Alembic History
+
+Older local Kubernetes databases may have a `logs` table that was created before Alembic owned schema changes. In that case, `alembic upgrade head` can fail with `relation "logs" already exists` because Alembic has no version history and tries to create the initial table again.
+
+For local development only, if the existing table matches the first migration shape, stamp the database at the baseline revision and then upgrade:
+
+```powershell
+kubectl port-forward service/postgres 5434:5432
+```
+
+From `services/log-service` in another terminal:
+
+```powershell
+$env:DATABASE_URL = "postgresql+psycopg://postgres:postgres@127.0.0.1:5434/logs"
+alembic stamp 2e3e3bad4dcc
+alembic upgrade head
+```
+
+`alembic stamp` records migration history without changing tables. It should be treated as a recovery tool, not the normal production migration path.

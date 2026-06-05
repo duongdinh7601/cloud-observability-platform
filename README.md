@@ -81,7 +81,7 @@ kubectl port-forward service/frontend 3000:3000
 - Phase 5: Database migration workflow - complete locally and in tests; Kubernetes/CI execution strategy planned
 - Phase 6: Platform observability - in progress; structured request logs, request IDs, a Prometheus `/metrics` endpoint, local Kubernetes Prometheus scraping, and local Kubernetes Grafana visualization are implemented for `log-service`
 
-The current observability slice emits JSON request logs from `log-service`, skips health-check log noise, correlates handled responses with `X-Request-ID`, exposes Prometheus metrics for HTTP requests, request duration, and log ingestion, and includes lightweight dev Prometheus and Grafana deployments in Kubernetes. Next observability work includes dashboard refinement, alerts, tracing, and centralized service-wide logging configuration.
+The current observability slice emits JSON request logs from `log-service`, skips health-check log noise, correlates handled responses with `X-Request-ID`, exposes Prometheus metrics for HTTP requests, request duration, and log ingestion, and includes lightweight dev Prometheus and Grafana deployments in Kubernetes. The first manual Grafana dashboard panels cover request volume, request rate, server errors, p95 latency, and log ingestion. Next observability work includes dashboard refinement, alerts, tracing, and centralized service-wide logging configuration.
 
 ## Current Production-Shaped Follow-Ups
 
