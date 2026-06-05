@@ -261,17 +261,34 @@ Production follow-ups:
 
 ### Phase 6.6 - Alerts
 
+Status: Complete for local/dev Prometheus alert foundation
+
 Goal:
 
 - Detect platform problems automatically.
 
-Potential alerts:
+Completed scope:
 
-- high 5xx rate
-- high request latency
-- `log-service` unavailable
+- Added a dev Prometheus alert rules file through the `prometheus-config` ConfigMap
+- Configured Prometheus to load `/etc/prometheus/alert_rules.yml`
+- Added `LogServiceTargetDown` for `up{job="log-service"} == 0`
+- Used `for: 2m` to avoid alerting immediately on a single missed scrape
+- Verified the alert lifecycle through pending, firing, and inactive states
+
+Potential future alerts:
+
+- High 5xx rate
+- High request latency
 - Postgres readiness failures
-- unexpected ingestion volume drops
+- Unexpected ingestion volume drops once normal ingestion baselines are known
+
+Production follow-ups:
+
+- Move from ConfigMap-embedded dev rules to Prometheus Operator `PrometheusRule` resources or managed alert rules
+- Add Alertmanager or a managed notification path
+- Tune severity levels and `for:` durations based on real behavior
+- Add runbook links in alert annotations
+- Avoid noisy ingestion-volume alerts until expected traffic patterns are known
 
 ### Phase 6.7 - Tracing
 

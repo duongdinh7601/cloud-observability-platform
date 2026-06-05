@@ -14,6 +14,7 @@ Docker Compose files currently live at the repository root, while Kubernetes res
 - The `log-service` exposes Prometheus-format metrics at `/metrics`.
 - The dev Kubernetes overlay includes lightweight Prometheus and Grafana deployments for local metrics scraping and visualization.
 - The first local Grafana dashboard panels cover request volume, request rate, server errors, p95 latency, and log ingestion.
+- The dev Prometheus setup includes a first local alert rule for detecting when Prometheus cannot scrape `log-service`.
 
 ## Planned Direction
 
@@ -21,7 +22,7 @@ Docker Compose files currently live at the repository root, while Kubernetes res
 - Replace committed raw Secrets with a production secret-management workflow.
 - Move production image tags to immutable release versions.
 - Add CI/CD-driven database migration execution before application rollouts.
-- Replace the lightweight dev Prometheus/Grafana setup with production monitoring infrastructure, then add dashboard provisioning, alerts, and tracing.
+- Replace the lightweight dev Prometheus/Grafana setup with production monitoring infrastructure, then add dashboard provisioning, production alert routing, and tracing.
 - Add linting/formatting and validation checks to CI.
 - Keep infrastructure concerns separate from service application code.
 

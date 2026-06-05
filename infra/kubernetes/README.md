@@ -111,6 +111,48 @@ If `up{job="log-service"}` is `0`, check the Prometheus target error under **Sta
 
 Successful `POST /logs` ingestion in Kubernetes depends on the database schema being migrated. Until the migration Job strategy is implemented, the ingestion counter may remain `0` in cluster even when Prometheus scraping is healthy.
 
+## Local Prometheus Alerts
+
+The dev Prometheus ConfigMap includes a first local alert rule file:
+
+```text
+/etc/prometheus/alert_rules.yml
+```
+
+Current local alert:
+
+```text
+LogServiceTargetDown
+```
+
+Condition:
+
+```promql
+up{job="log-service"} == 0
+```
+
+This alert means Prometheus cannot scrape the `log-service` metrics endpoint. The rule uses `for: 2m`, so it must stay true for 2 minutes before firing.
+
+Check alert state in Prometheus:
+
+```text
+http://127.0.0.1:9090/alerts
+```
+
+Alert states:
+
+- `inactive`: the alert condition is false
+- `pending`: the alert condition is true, but has not been true for the full `for:` duration yet
+- `firing`: the alert condition has stayed true for the full `for:` duration
+
+If the alert is pending or firing, check the target first:
+
+```text
+http://127.0.0.1:9090/targets
+```
+
+For the current local setup, common causes are a stale `log-service:k8s-dev` image without `/metrics`, a down pod, or a broken Service-to-pod path.
+
 ## Local Grafana
 
 The dev overlay includes a lightweight Grafana Deployment for local dashboard exploration.
@@ -288,6 +330,9 @@ Known follow-up areas:
 - Add CI/CD automation for image builds, scans, pushes, and deployment.
 - Add namespaces, RBAC, NetworkPolicies, container hardening, TLS, and production ingress/cert management.
 - Replace the lightweight dev Prometheus/Grafana setup with production monitoring such as kube-prometheus-stack, Prometheus Operator, Grafana Operator, managed Prometheus, or managed Grafana.
+- Move local ConfigMap-embedded alert rules to Prometheus Operator `PrometheusRule` resources or managed alert rules.
+- Add Alertmanager or a managed notification path for production alert delivery.
+- Add alert runbook links and tune severities and `for:` durations based on real behavior.
 - Move Grafana admin credentials and other sensitive monitoring configuration into Secrets or external secret management.
 - Provision Grafana dashboards as code once the dashboard design stabilizes.
 - Add alerts and eventually tracing.
