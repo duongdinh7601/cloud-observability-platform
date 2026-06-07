@@ -15,6 +15,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 5) Copy application code
 COPY app ./app
 COPY scripts ./scripts
+COPY alembic.ini .
+COPY migrations ./migrations
 
 # 6) Expose the port uvicorn will listen on
 EXPOSE 8000

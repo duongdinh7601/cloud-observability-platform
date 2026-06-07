@@ -8,6 +8,7 @@ Kubernetes manifests for the Cloud Observability Platform are organized with Kus
 infra/kubernetes/
 |-- base/
 |   |-- frontend.yaml
+|   |-- log-service-migration-job.yaml
 |   |-- log-service.yaml
 |   |-- postgres.yaml
 |   |-- kustomization.yaml
@@ -109,7 +110,7 @@ log_service_logs_ingested_total
 
 If `up{job="log-service"}` is `0`, check the Prometheus target error under **Status -> Targets**. A `404` usually means the Kubernetes `log-service:k8s-dev` image is stale and needs to be rebuilt.
 
-Successful `POST /logs` ingestion in Kubernetes depends on the database schema being migrated. Until the migration Job strategy is implemented, the ingestion counter may remain `0` in cluster even when Prometheus scraping is healthy.
+Successful `POST /logs` ingestion in Kubernetes depends on the database schema being migrated. The dev overlay includes a migration Job foundation so local Kubernetes can run Alembic before relying on ingestion behavior.
 
 ## Local Prometheus Alerts
 
@@ -342,7 +343,36 @@ Known follow-up areas:
 
 The `log-service` uses Alembic migrations. Application pods should not create or mutate database tables during startup.
 
-Future production rollout shape:
+The base manifests include a local/dev migration Job:
+
+```text
+Job: log-service-migrations
+Command: python -m alembic upgrade head
+Secret: log-service-db
+Key: DATABASE_URL
+```
+
+The Job uses the same `log-service` image reference as the app Deployment through Kustomize image replacement. The `log-service` image includes both application code and Alembic migration files.
+
+Run the migration Job locally:
+
+```powershell
+docker build -t log-service:k8s-dev services/log-service
+kubectl delete job log-service-migrations --ignore-not-found
+kubectl apply -k infra/kubernetes/overlays/dev
+kubectl logs job/log-service-migrations
+```
+
+Check completion:
+
+```powershell
+kubectl get job log-service-migrations
+kubectl get pods -l job-name=log-service-migrations
+```
+
+Because Kubernetes Jobs are run-to-completion resources, applying the same Job again does not rerun it after it has completed. For local reruns, delete the old Job first.
+
+Production rollout shape:
 
 ```text
 CI builds log-service image
@@ -360,7 +390,9 @@ Secret: log-service-db
 Key: DATABASE_URL
 ```
 
-Because Kubernetes Jobs are run-to-completion resources, CI/CD should either create release-specific Job names or clean up old migration Jobs before creating a new one.
+CI/CD should either create release-specific Job names or clean up old migration Jobs before creating a new one. The rollout should stop if the migration Job fails.
+
+Local Docker Desktop can keep stale images when the same tag such as `log-service:k8s-dev` is reused. If a Job or Deployment appears to run old code, rebuild the image and consider using a temporary unique local tag for verification. Production should use immutable release tags instead of mutable local tags.
 
 ### Local Dev Recovery: Existing Table Without Alembic History
 

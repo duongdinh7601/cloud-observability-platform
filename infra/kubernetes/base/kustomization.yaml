@@ -5,3 +5,4 @@ resources:
   - postgres.yaml
   - log-service.yaml
   - frontend.yaml
+  - log-service-migration-job.yaml

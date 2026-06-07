@@ -98,7 +98,7 @@ Next likely improvements:
 
 ## Phase 5 - Database Migration Deployment Strategy
 
-Status: Planned for Kubernetes/CI
+Status: Complete for local/dev Job foundation; CI orchestration planned
 
 Goals:
 
@@ -106,7 +106,16 @@ Goals:
 - Avoid app pods mutating schema during startup
 - Ensure app code and schema migrations come from the same release artifact
 
-Planned shape:
+Completed local/dev scope:
+
+- Added a reusable Kubernetes Job manifest for `log-service` migrations
+- Job runs `python -m alembic upgrade head`
+- Job reads `DATABASE_URL` from the `log-service-db` Secret
+- Job uses the same `log-service` image reference as the app Deployment through Kustomize image replacement
+- Updated the `log-service` image to include `alembic.ini` and `migrations/`
+- Verified the Job can run Alembic inside local Kubernetes
+
+Planned production shape:
 
 - Build and push the `log-service` image with an immutable release tag
 - Run a Kubernetes migration Job using the same image tag
@@ -114,6 +123,14 @@ Planned shape:
 - Stop the rollout if the migration Job fails
 - Roll out the `log-service` Deployment only after migrations succeed
 - Use release-specific Job names or CI cleanup because Kubernetes Jobs are run-to-completion resources
+
+Production follow-ups:
+
+- CI/CD should create a release-specific Job name or delete/recreate old migration Jobs
+- CI/CD should wait for database readiness before running migrations
+- CI/CD should fail the rollout when the migration Job fails
+- Production should use immutable image tags so app and migration Job code cannot drift
+- Local Docker Desktop stale-tag behavior should be improved with clearer dev image workflow
 
 ## Phase 6 - Platform Observability
 
@@ -257,7 +274,7 @@ Production follow-ups:
 - Move Grafana admin credentials and sensitive configuration into Kubernetes Secrets or external secret management
 - Add auth, TLS, RBAC, and controlled ingress before exposing Grafana outside local dev
 - Provision dashboards as code after the first dashboard design stabilizes
-- Add Kubernetes/CI migrations before relying on ingestion metrics in deployed environments
+- Use the migration Job before relying on ingestion metrics in deployed environments
 
 ### Phase 6.6 - Alerts
 
