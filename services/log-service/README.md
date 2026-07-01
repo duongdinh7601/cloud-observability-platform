@@ -162,9 +162,11 @@ Current migrations:
 Future Kubernetes/CI direction:
 
 - build and push the `log-service` image
-- run `alembic upgrade head` in a Kubernetes Job using the same image tag
+- run `python -m alembic upgrade head` in a Kubernetes Job using the same image tag
 - inject `DATABASE_URL` from the `log-service-db` Secret
 - only roll out new app pods after the migration Job succeeds
+
+The service image includes `alembic.ini` and `migrations/` so the Kubernetes migration Job can run Alembic from the same artifact as the application.
 
 ## Testing
 
@@ -189,6 +191,14 @@ From the repo root, build the local Kubernetes image and apply the dev overlay:
 ```bash
 docker build -t log-service:k8s-dev services/log-service
 kubectl apply -k infra/kubernetes/overlays/dev
+```
+
+The dev overlay includes a `log-service-migrations` Job. To rerun it locally after it has completed:
+
+```bash
+kubectl delete job log-service-migrations --ignore-not-found
+kubectl apply -k infra/kubernetes/overlays/dev
+kubectl logs job/log-service-migrations
 ```
 
 The service is internal to the cluster. For local Swagger UI access, use:

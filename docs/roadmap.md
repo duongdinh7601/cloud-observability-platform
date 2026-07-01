@@ -98,7 +98,7 @@ Next likely improvements:
 
 ## Phase 5 - Database Migration Deployment Strategy
 
-Status: Planned for Kubernetes/CI
+Status: Complete for local/dev Job foundation; CI orchestration planned
 
 Goals:
 
@@ -106,7 +106,16 @@ Goals:
 - Avoid app pods mutating schema during startup
 - Ensure app code and schema migrations come from the same release artifact
 
-Planned shape:
+Completed local/dev scope:
+
+- Added a reusable Kubernetes Job manifest for `log-service` migrations
+- Job runs `python -m alembic upgrade head`
+- Job reads `DATABASE_URL` from the `log-service-db` Secret
+- Job uses the same `log-service` image reference as the app Deployment through Kustomize image replacement
+- Updated the `log-service` image to include `alembic.ini` and `migrations/`
+- Verified the Job can run Alembic inside local Kubernetes
+
+Planned production shape:
 
 - Build and push the `log-service` image with an immutable release tag
 - Run a Kubernetes migration Job using the same image tag
@@ -114,6 +123,14 @@ Planned shape:
 - Stop the rollout if the migration Job fails
 - Roll out the `log-service` Deployment only after migrations succeed
 - Use release-specific Job names or CI cleanup because Kubernetes Jobs are run-to-completion resources
+
+Production follow-ups:
+
+- CI/CD should create a release-specific Job name or delete/recreate old migration Jobs
+- CI/CD should wait for database readiness before running migrations
+- CI/CD should fail the rollout when the migration Job fails
+- Production should use immutable image tags so app and migration Job code cannot drift
+- Local Docker Desktop stale-tag behavior should be improved with clearer dev image workflow
 
 ## Phase 6 - Platform Observability
 
@@ -202,43 +219,93 @@ Production follow-ups:
 
 ### Phase 6.4 - Kubernetes Metrics Scraping
 
+Status: Complete for local/dev Prometheus
+
 Goal:
 
 - Prepare local Kubernetes to collect service metrics.
 
-Planned scope:
+Completed scope:
 
-- Add Prometheus or kube-prometheus-stack later
-- Choose scrape annotations or ServiceMonitor depending on the monitoring stack
-- Keep local development setup understandable before adding production-grade monitoring complexity
+- Added a dev-overlay Prometheus Deployment, ConfigMap, and ClusterIP Service
+- Configured Prometheus to scrape `log-service:8000` at `/metrics`
+- Verified `up{job="log-service"}` and `log_service_http_requests_total` in the Prometheus UI
+- Kept the setup local/dev focused instead of adding production Prometheus Operator complexity
+
+Production follow-ups:
+
+- Choose kube-prometheus-stack, Prometheus Operator, or managed monitoring for production
+- Add scrape annotations or ServiceMonitor resources depending on the chosen stack
+- Decide whether `/metrics` scrape traffic should be excluded from request metrics or filtered in dashboards
+- Run Kubernetes database migrations before relying on ingestion metrics from `POST /logs` in cluster
 
 ### Phase 6.5 - Grafana Dashboards
+
+Status: Complete for local/dev Grafana foundation
 
 Goal:
 
 - Visualize platform behavior.
 
-Planned scope:
+Completed scope:
 
-- Request rate
-- Error rate
-- Latency percentiles
-- Logs ingested over time
+- Added a dev-overlay Grafana Deployment, datasource ConfigMap, and ClusterIP Service
+- Provisioned Grafana with a Prometheus datasource at `http://prometheus:9090`
+- Verified Grafana can query Prometheus data from local Kubernetes
+- Built the first dashboard manually so PromQL queries and panel choices can be learned before codifying them
+- Added starter panels for recent request volume, request rate, server errors, p95 latency, and logs ingested
+
+Dashboard queries explored:
+
+- `increase(log_service_http_requests_total[5m])` for local recent request volume
+- `rate(log_service_http_requests_total[5m])` for request throughput
+- `increase(log_service_http_requests_total{status_code=~"5.."}[5m])` for recent server errors
+- `histogram_quantile(0.95, ...)` over `log_service_http_request_duration_seconds_bucket` for p95 latency
+- `increase(log_service_logs_ingested_total[5m])` for recent successful log ingestion
+
+Remaining dashboard scope:
+
 - Health and readiness status
+- More polished panel legends, units, and layout
+
+Production follow-ups:
+
+- Replace lightweight dev Grafana with kube-prometheus-stack, Grafana Operator, managed Grafana, or another production monitoring choice
+- Move Grafana admin credentials and sensitive configuration into Kubernetes Secrets or external secret management
+- Add auth, TLS, RBAC, and controlled ingress before exposing Grafana outside local dev
+- Provision dashboards as code after the first dashboard design stabilizes
+- Use the migration Job before relying on ingestion metrics in deployed environments
 
 ### Phase 6.6 - Alerts
+
+Status: Complete for local/dev Prometheus alert foundation
 
 Goal:
 
 - Detect platform problems automatically.
 
-Potential alerts:
+Completed scope:
 
-- high 5xx rate
-- high request latency
-- `log-service` unavailable
+- Added a dev Prometheus alert rules file through the `prometheus-config` ConfigMap
+- Configured Prometheus to load `/etc/prometheus/alert_rules.yml`
+- Added `LogServiceTargetDown` for `up{job="log-service"} == 0`
+- Used `for: 2m` to avoid alerting immediately on a single missed scrape
+- Verified the alert lifecycle through pending, firing, and inactive states
+
+Potential future alerts:
+
+- High 5xx rate
+- High request latency
 - Postgres readiness failures
-- unexpected ingestion volume drops
+- Unexpected ingestion volume drops once normal ingestion baselines are known
+
+Production follow-ups:
+
+- Move from ConfigMap-embedded dev rules to Prometheus Operator `PrometheusRule` resources or managed alert rules
+- Add Alertmanager or a managed notification path
+- Tune severity levels and `for:` durations based on real behavior
+- Add runbook links in alert annotations
+- Avoid noisy ingestion-volume alerts until expected traffic patterns are known
 
 ### Phase 6.7 - Tracing
 
