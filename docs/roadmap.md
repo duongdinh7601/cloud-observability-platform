@@ -339,10 +339,13 @@ Completed scope:
 - Added a backend Ruff quality gate for `log-service`
 - Enforces backend formatting with `ruff format --check .`
 - Enforces backend linting with `ruff check .`
+- Added a frontend ESLint quality gate
+- Migrated frontend linting from deprecated `next lint` to the ESLint CLI
+- Enforces frontend linting before the Next.js production build in CI
 
 Remaining scope:
 
-- Frontend linting and formatting with ESLint and Prettier
+- Frontend formatting with Prettier
 - Repo-level CI cleanup, including dependency caching and clearer job boundaries
 - Container image build validation for backend and frontend
 - Container image scans
@@ -353,7 +356,7 @@ Remaining scope:
 Planned quality-gate sequence:
 
 - Backend Python gate: Ruff formatting, Ruff linting, and pytest for `log-service`
-- Frontend gate: Next.js build plus linting and formatting once the frontend tooling is settled
+- Frontend gate: ESLint and Next.js build are implemented; Prettier formatting is planned
 - Repo CI cleanup: caching, optional path filters, clearer job names, and status documentation
 - Container gate: build Docker images in CI before pushing release images
 - CD foundation: push immutable images, run migrations, deploy, and verify rollout health
@@ -367,7 +370,7 @@ Production follow-ups:
 - Stop deployment automatically if tests, image builds, scans, migrations, or rollout checks fail
 - Split runtime and development dependencies so Ruff and pytest are not installed in production images
 - Revisit stricter Ruff rules, including type-hint modernization, after the first gate is stable
-- Add dependency caching, frontend quality gates, and security scanning once the baseline workflow is stable
+- Add dependency caching, frontend formatting, and security scanning once the baseline workflow is stable
 
 ## Phase 8 - Platform Expansion
 
