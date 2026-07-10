@@ -1,10 +1,11 @@
 from app.models import Log
 
+
 def test_get_logs_empty(client, testing_session_local):
     with testing_session_local() as db:
         db.query(Log).delete()
         db.commit()
-        
+
     response = client.get("/logs")
 
     assert response.status_code == 200
@@ -13,7 +14,7 @@ def test_get_logs_empty(client, testing_session_local):
 
     assert "items" in data
     assert "next_cursor" in data
-    
+
     assert isinstance(data["items"], list)
     assert data["items"] == []
 
@@ -40,8 +41,10 @@ def test_cursor_pagination_two_logs(client, testing_session_local):
         "message": "first",
     }
 
-    r1 = client.post("/logs", json=log1)
-    r2 = client.post("/logs", json=log2)
+    create_response_1 = client.post("/logs", json=log1)
+    create_response_2 = client.post("/logs", json=log2)
+    assert create_response_1.status_code == 201
+    assert create_response_2.status_code == 201
 
     # First page
     page1 = client.get("/logs", params={"limit": 1})
@@ -51,11 +54,14 @@ def test_cursor_pagination_two_logs(client, testing_session_local):
     cursor = data1["next_cursor"]
 
     # Second page using cursor
-    page2 = client.get("/logs", params={
-        "limit": 1,
-        "cursor_ts": cursor["cursor_ts"],
-        "cursor_id": cursor["cursor_id"],
-    })
+    page2 = client.get(
+        "/logs",
+        params={
+            "limit": 1,
+            "cursor_ts": cursor["cursor_ts"],
+            "cursor_id": cursor["cursor_id"],
+        },
+    )
     data2 = page2.json()
 
     assert len(data1["items"]) == 1

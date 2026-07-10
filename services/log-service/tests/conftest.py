@@ -1,16 +1,14 @@
 from pathlib import Path
 
 import pytest
+from alembic import command
+from alembic.config import Config
+from app.database import get_db
+from app.main import app
+from app.settings import TEST_DATABASE_URL
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-
-from alembic import command
-from alembic.config import Config
-
-from app.settings import TEST_DATABASE_URL
-from app.main import app
-from app.database import get_db
 
 assert TEST_DATABASE_URL, "TEST_DATABASE_URL is not set"
 
@@ -58,7 +56,7 @@ def client():
             yield db
         finally:
             db.close()
-    
+
     app.dependency_overrides[get_db] = override_get_db
 
     with TestClient(app) as test_client:

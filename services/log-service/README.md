@@ -23,6 +23,7 @@ It is designed as an internal backend service that can be run locally, tested in
 - psycopg v3
 - prometheus-client
 - pytest
+- Ruff
 
 ## API Surface
 
@@ -184,6 +185,28 @@ The current tests verify:
 - cursor pagination stability
 - metadata round-tripping through `POST /logs` and `GET /logs`
 
+## Quality Checks
+
+The service uses Ruff for Python formatting and linting.
+
+Run the same backend quality checks that CI runs:
+
+```bash
+ruff format --check .
+ruff check .
+pytest
+```
+
+During local development, apply formatting with:
+
+```bash
+ruff format .
+```
+
+Current Ruff configuration lives in `pyproject.toml`. The first gate is intentionally conservative: it enforces formatting, import order, basic style, unused-code checks, and selected bug-prone patterns while ignoring FastAPI's expected `Depends(...)` default-argument pattern.
+
+Future cleanup should split runtime dependencies from development/test tooling so Ruff and pytest are not installed in production images.
+
 ## Local Kubernetes
 
 From the repo root, build the local Kubernetes image and apply the dev overlay:
@@ -227,6 +250,7 @@ services/log-service/
 |   |-- test_logs.py
 |-- Dockerfile
 |-- alembic.ini
+|-- pyproject.toml
 |-- requirements.txt
 |-- .env.example
 |-- README.md
