@@ -321,14 +321,23 @@ Planned scope:
 
 ## Phase 7 - CI/CD and Quality Automation
 
-Status: Planned
+Status: In Progress; initial CI validation complete
 
 Goals:
 
 - Automate validation, image builds, and deployment
 - Add repeatable quality checks across backend and frontend
 
-Potential scope:
+Completed scope:
+
+- Added a GitHub Actions `CI` workflow
+- Runs on pull requests, pushes to `main`, and manual dispatch
+- Runs backend tests against a temporary PostgreSQL service container
+- Builds the Next.js frontend with `npm ci` and `npm run build`
+- Renders dev and prod Kubernetes overlays with `kubectl kustomize`
+- Verified the workflow passes in GitHub Actions
+
+Remaining scope:
 
 - Backend tests and future linting/formatting with Ruff or Black
 - Frontend linting and formatting with ESLint and Prettier
@@ -336,6 +345,15 @@ Potential scope:
 - Push immutable images to GHCR
 - Apply migrations and roll out Kubernetes manifests
 - Verify rollout health
+
+Production follow-ups:
+
+- Keep CI validation separate from deployment automation until the release path is deliberate
+- Add immutable image tags based on Git SHA or semantic release versions
+- Build and push frontend and log-service images from CI
+- Run the Alembic migration Job with the same immutable `log-service` image tag before app rollout
+- Stop deployment automatically if tests, image builds, scans, migrations, or rollout checks fail
+- Add dependency caching, linting, formatting, and security scanning once the baseline workflow is stable
 
 ## Phase 8 - Platform Expansion
 

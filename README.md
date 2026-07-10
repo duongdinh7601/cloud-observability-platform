@@ -11,7 +11,8 @@ The current platform centers on a log ingestion service, a Next.js dashboard, an
 - Database: PostgreSQL 16
 - Containerization: Docker, Docker Compose
 - Orchestration: Kubernetes, Kustomize
-- Future platform work: CI/CD, stronger secret management, alerts, and tracing
+- Platform automation: GitHub Actions CI for backend tests, frontend build, and Kubernetes manifest rendering
+- Future platform work: CD, stronger secret management, production alerting, and tracing
 
 ## Repository Layout
 
@@ -39,6 +40,18 @@ The current platform centers on a log ingestion service, a Next.js dashboard, an
 - `overlays/prod/` documents the production-intent image shape for future GHCR release images.
 - The Kubernetes request path mirrors the Compose model: browser to frontend, frontend rewrite to `log-service`, log-service to `postgres`.
 - Database schema changes are managed through Alembic. A future CI/CD migration step should run migrations through a Kubernetes Job before rolling out new app pods.
+
+## CI Validation
+
+The repository includes a GitHub Actions `CI` workflow that runs on pull requests, pushes to `main`, and manual dispatch.
+
+Current checks:
+
+- Backend tests run against a temporary PostgreSQL service container.
+- The Next.js frontend installs dependencies with `npm ci` and runs a production build.
+- Dev and prod Kubernetes overlays are rendered with Kustomize.
+
+This is validation only. Future CD work will build and push immutable images, run the migration Job with the same release image tag, and verify Kubernetes rollouts.
 
 ## Run Modes
 
@@ -80,6 +93,7 @@ kubectl port-forward service/frontend 3000:3000
 - Phase 4: Kubernetes deployment foundations - complete for the current local/dev scope
 - Phase 5: Database migration workflow - complete locally and in tests; a local/dev Kubernetes migration Job foundation is implemented and CI execution strategy is planned
 - Phase 6: Platform observability - in progress; structured request logs, request IDs, a Prometheus `/metrics` endpoint, local Kubernetes Prometheus scraping, local Kubernetes Grafana visualization, and a first local Prometheus alert rule are implemented for `log-service`
+- Phase 7: CI/CD and quality automation - in progress; initial CI validation is implemented
 
 The current observability slice emits JSON request logs from `log-service`, skips health-check log noise, correlates handled responses with `X-Request-ID`, exposes Prometheus metrics for HTTP requests, request duration, and log ingestion, and includes lightweight dev Prometheus and Grafana deployments in Kubernetes. The first manual Grafana dashboard panels cover request volume, request rate, server errors, p95 latency, and log ingestion, and the first local alert detects when Prometheus cannot scrape `log-service`. Next observability work includes dashboard refinement, production alerting shape, tracing, and centralized service-wide logging configuration.
 
@@ -87,7 +101,7 @@ The current observability slice emits JSON request logs from `log-service`, skip
 
 - Move the local/dev Kubernetes migration Job into a CI-controlled rollout flow.
 - Replace placeholder production image tags with immutable release tags.
-- Add CI/CD for tests, linting, image build, scanning, registry push, migration execution, and rollout verification.
+- Expand CI/CD with linting, formatting, image build, scanning, registry push, migration execution, and rollout verification.
 - Replace local Kubernetes Secrets with External Secrets Operator plus a cloud secret manager or Vault.
 - Decide on managed Postgres versus in-cluster Postgres for production.
 - Refine Grafana dashboards, then move alerting toward a production-ready notification path and eventually add distributed tracing.
