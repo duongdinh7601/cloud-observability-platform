@@ -19,6 +19,7 @@ It is built as the public-facing entrypoint of the platform and uses same-origin
 - Tailwind CSS
 - shadcn/ui
 - TanStack Query
+- ESLint
 
 ## Key Features
 
@@ -43,7 +44,7 @@ It is built as the public-facing entrypoint of the platform and uses same-origin
 
 - Add richer metadata inspection in the log detail experience
 - Add charts and summaries once metrics endpoints exist
-- Add frontend linting/formatting checks to CI
+- Add frontend formatting checks to CI
 - Integrate authenticated user flows when platform auth is introduced
 
 ## Local Development
@@ -61,6 +62,17 @@ cd frontend
 npm install
 npm run dev
 ```
+
+Run the same frontend checks that CI runs:
+
+```bash
+npm run lint
+npm run build
+```
+
+Frontend linting uses ESLint 9 flat config in `eslint.config.mjs`. The lint command checks source files and project config while ignoring generated build output such as `.next/`.
+
+Future quality work should add a formatter such as Prettier and enforce it in CI.
 
 For local Kubernetes, build the dev image from the repo root and apply the dev overlay:
 
@@ -87,6 +99,7 @@ frontend/
 |-- scripts/
 |   |-- container_healthcheck.js
 |-- Dockerfile
+|-- eslint.config.mjs
 |-- next.config.mjs
 |-- package.json
 |-- README.md

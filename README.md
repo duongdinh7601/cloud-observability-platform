@@ -49,6 +49,7 @@ Current checks:
 
 - Backend formatting and linting are enforced with Ruff.
 - Backend tests run against a temporary PostgreSQL service container.
+- Frontend linting is enforced with ESLint.
 - The Next.js frontend installs dependencies with `npm ci` and runs a production build.
 - Dev and prod Kubernetes overlays are rendered with Kustomize.
 
@@ -94,7 +95,7 @@ kubectl port-forward service/frontend 3000:3000
 - Phase 4: Kubernetes deployment foundations - complete for the current local/dev scope
 - Phase 5: Database migration workflow - complete locally and in tests; a local/dev Kubernetes migration Job foundation is implemented and CI execution strategy is planned
 - Phase 6: Platform observability - in progress; structured request logs, request IDs, a Prometheus `/metrics` endpoint, local Kubernetes Prometheus scraping, local Kubernetes Grafana visualization, and a first local Prometheus alert rule are implemented for `log-service`
-- Phase 7: CI/CD and quality automation - in progress; initial CI validation and backend Ruff quality gates are implemented
+- Phase 7: CI/CD and quality automation - in progress; initial CI validation, backend Ruff quality gates, and frontend ESLint quality gates are implemented
 
 The current observability slice emits JSON request logs from `log-service`, skips health-check log noise, correlates handled responses with `X-Request-ID`, exposes Prometheus metrics for HTTP requests, request duration, and log ingestion, and includes lightweight dev Prometheus and Grafana deployments in Kubernetes. The first manual Grafana dashboard panels cover request volume, request rate, server errors, p95 latency, and log ingestion, and the first local alert detects when Prometheus cannot scrape `log-service`. Next observability work includes dashboard refinement, production alerting shape, tracing, and centralized service-wide logging configuration.
 
@@ -102,7 +103,7 @@ The current observability slice emits JSON request logs from `log-service`, skip
 
 - Move the local/dev Kubernetes migration Job into a CI-controlled rollout flow.
 - Replace placeholder production image tags with immutable release tags.
-- Expand CI/CD with frontend quality gates, image build, scanning, registry push, migration execution, and rollout verification.
+- Expand CI/CD with frontend formatting, image build, scanning, registry push, migration execution, and rollout verification.
 - Replace local Kubernetes Secrets with External Secrets Operator plus a cloud secret manager or Vault.
 - Decide on managed Postgres versus in-cluster Postgres for production.
 - Refine Grafana dashboards, then move alerting toward a production-ready notification path and eventually add distributed tracing.
