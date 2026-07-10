@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Response
-from prometheus_client import Counter, Histogram, CONTENT_TYPE_LATEST, generate_latest
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
 router = APIRouter(tags=["metrics"])
 
@@ -22,10 +22,7 @@ LOGS_INGESTED_TOTAL = Counter(
 
 
 def record_http_request_metrics(
-    method: str, 
-    path: str, 
-    status_code: int, 
-    duration_seconds: float
+    method: str, path: str, status_code: int, duration_seconds: float
 ) -> None:
     """Record Prometheus metrics for one HTTP request."""
 

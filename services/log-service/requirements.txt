@@ -8,3 +8,4 @@ python-dotenv==1.0.1
 prometheus-client==0.20.0
 httpx==0.27.2  # Optional, for service-to-service calls
 pytest==7.4.2  # Optional, for testing
+ruff==0.8.6  # Optional, for linting and formatting

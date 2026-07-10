@@ -1,6 +1,8 @@
 import os
 import sys
-import urllib.request, urllib.error
+import urllib.error
+import urllib.request
+
 
 def main():
     # Optional override for non-default deployments
@@ -12,6 +14,7 @@ def main():
             sys.exit(0 if response.status == 200 else 1)
     except Exception:
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
