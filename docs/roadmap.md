@@ -336,15 +336,27 @@ Completed scope:
 - Builds the Next.js frontend with `npm ci` and `npm run build`
 - Renders dev and prod Kubernetes overlays with `kubectl kustomize`
 - Verified the workflow passes in GitHub Actions
+- Added a backend Ruff quality gate for `log-service`
+- Enforces backend formatting with `ruff format --check .`
+- Enforces backend linting with `ruff check .`
 
 Remaining scope:
 
-- Backend tests and future linting/formatting with Ruff or Black
 - Frontend linting and formatting with ESLint and Prettier
-- Container image builds and scans
+- Repo-level CI cleanup, including dependency caching and clearer job boundaries
+- Container image build validation for backend and frontend
+- Container image scans
 - Push immutable images to GHCR
 - Apply migrations and roll out Kubernetes manifests
 - Verify rollout health
+
+Planned quality-gate sequence:
+
+- Backend Python gate: Ruff formatting, Ruff linting, and pytest for `log-service`
+- Frontend gate: Next.js build plus linting and formatting once the frontend tooling is settled
+- Repo CI cleanup: caching, optional path filters, clearer job names, and status documentation
+- Container gate: build Docker images in CI before pushing release images
+- CD foundation: push immutable images, run migrations, deploy, and verify rollout health
 
 Production follow-ups:
 
@@ -353,7 +365,9 @@ Production follow-ups:
 - Build and push frontend and log-service images from CI
 - Run the Alembic migration Job with the same immutable `log-service` image tag before app rollout
 - Stop deployment automatically if tests, image builds, scans, migrations, or rollout checks fail
-- Add dependency caching, linting, formatting, and security scanning once the baseline workflow is stable
+- Split runtime and development dependencies so Ruff and pytest are not installed in production images
+- Revisit stricter Ruff rules, including type-hint modernization, after the first gate is stable
+- Add dependency caching, frontend quality gates, and security scanning once the baseline workflow is stable
 
 ## Phase 8 - Platform Expansion
 
@@ -363,10 +377,29 @@ Goals:
 
 - Expand beyond the initial log-service-focused architecture
 - Introduce additional internal services when the platform design justifies them
+- Explore higher-level incident workflows once core observability signals are reliable
 
 Potential scope:
 
 - API gateway
 - Metrics service
 - Alerts or rules service
+- AI incident assistant
 - Shared platform-level contracts
+
+### AI Incident Assistant
+
+Potential long-term scope:
+
+- Summarize active incidents from logs, metrics, alerts, and traces
+- Suggest likely causes based on correlated platform signals
+- Link alerts to relevant dashboards, logs, traces, and runbooks
+- Help draft incident timelines and post-incident summaries
+- Stay advisory by default so humans make final operational decisions
+
+Prerequisites:
+
+- Reliable structured logs, metrics, alerts, and eventually traces
+- Clear service ownership and runbook metadata
+- Strong access controls so sensitive operational data is not exposed broadly
+- Evaluation and guardrails so generated explanations do not become trusted blindly
