@@ -29,6 +29,8 @@ infra/kubernetes/
 - `overlays/dev/` adapts the base for local Docker Desktop Kubernetes by using local image tags such as `frontend:k8s-dev` and `log-service:k8s-dev`, plus a local Ingress host.
 - `overlays/prod/` documents the production-intent image shape with GHCR-hosted release images. It is not ready to apply until real release tags and production secret handling are in place.
 
+The GitHub Actions `CI` workflow renders the dev and prod overlays with `kubectl kustomize` so broken Kustomize composition is caught before merge. This is a static validation step; it does not deploy workloads or prove runtime cluster health.
+
 ## Secret Handling
 
 The base manifests reference Kubernetes Secret names but do not own the local secret values.
@@ -328,7 +330,7 @@ Known follow-up areas:
 - Decide whether Postgres should be managed outside the cluster.
 - Add ingress or gateway routing for public traffic.
 - Run database migrations through a Kubernetes Job or CI/CD-controlled migration step before rolling out app pods.
-- Add CI/CD automation for image builds, scans, pushes, and deployment.
+- Expand CI/CD automation beyond manifest rendering to image builds, scans, pushes, migrations, deployment, and rollout verification.
 - Add namespaces, RBAC, NetworkPolicies, container hardening, TLS, and production ingress/cert management.
 - Replace the lightweight dev Prometheus/Grafana setup with production monitoring such as kube-prometheus-stack, Prometheus Operator, Grafana Operator, managed Prometheus, or managed Grafana.
 - Move local ConfigMap-embedded alert rules to Prometheus Operator `PrometheusRule` resources or managed alert rules.
