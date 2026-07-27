@@ -87,3 +87,15 @@ jobs:
 
       - name: Render prod Kubernetes manifests
         run: kubectl kustomize infra/kubernetes/overlays/prod
+  
+  container-builds:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Build log-service image
+        run: docker build -t log-service:ci services/log-service
+
+      - name: Build frontend image
+        run: docker build -t frontend:ci frontend
