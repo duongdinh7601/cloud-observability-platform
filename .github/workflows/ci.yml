@@ -101,3 +101,21 @@ jobs:
 
       - name: Build frontend image
         run: docker build -t frontend:ci frontend
+
+      - name: Scan log-service image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: log-service:ci
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "0"
+
+      - name: Scan frontend image
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: frontend:ci
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "0"

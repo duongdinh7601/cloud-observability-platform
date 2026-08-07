@@ -55,8 +55,9 @@ Current checks:
 - The Next.js frontend installs dependencies with `npm ci` and runs a production build.
 - Dev and prod Kubernetes overlays are rendered with Kustomize.
 - Backend and frontend Docker images are built in CI without being pushed.
+- Backend and frontend Docker images are scanned with Trivy in report-only mode.
 
-This is validation only. Future CD work will push immutable images, run the migration Job with the same release image tag, and verify Kubernetes rollouts.
+This is validation only. Future CD work will enforce image scan policy, push immutable images, run the migration Job with the same release image tag, and verify Kubernetes rollouts.
 
 ## Run Modes
 
@@ -106,7 +107,7 @@ The current observability slice emits JSON request logs from `log-service`, skip
 
 - Move the local/dev Kubernetes migration Job into a CI-controlled rollout flow.
 - Replace placeholder production image tags with immutable release tags.
-- Expand CI/CD with frontend formatting, image scanning, registry push, migration execution, and rollout verification.
+- Expand CI/CD with frontend formatting, enforced image scan policy, registry push, migration execution, and rollout verification.
 - Replace local Kubernetes Secrets with External Secrets Operator plus a cloud secret manager or Vault.
 - Decide on managed Postgres versus in-cluster Postgres for production.
 - Refine Grafana dashboards, then move alerting toward a production-ready notification path and eventually add distributed tracing.

@@ -344,12 +344,13 @@ Completed scope:
 - Enforces frontend linting before the Next.js production build in CI
 - Added CI validation that builds backend and frontend Docker images
 - Image builds use local CI tags and do not push to a registry
+- Added report-only Trivy image scans for backend and frontend Docker images
 
 Remaining scope:
 
 - Frontend formatting with Prettier
 - Repo-level CI cleanup, including dependency caching and clearer job boundaries
-- Container image scans
+- Enforced container image scan policy
 - Push immutable images to GHCR
 - Apply migrations and roll out Kubernetes manifests
 - Verify rollout health
@@ -359,7 +360,7 @@ Planned quality-gate sequence:
 - Backend Python gate: Ruff formatting, Ruff linting, and pytest for `log-service`
 - Frontend gate: ESLint and Next.js build are implemented; Prettier formatting is planned
 - Repo CI cleanup: caching, optional path filters, clearer job names, and status documentation
-- Container gate: Docker image build validation is implemented; image scanning is planned
+- Container gate: Docker image build validation and report-only Trivy scanning are implemented; scan enforcement is planned
 - CD foundation: push immutable images, run migrations, deploy, and verify rollout health
 
 Production follow-ups:
@@ -367,6 +368,7 @@ Production follow-ups:
 - Keep CI validation separate from deployment automation until the release path is deliberate
 - Add immutable image tags based on Git SHA or semantic release versions
 - Push frontend and log-service images from CI after image build validation is stable
+- Tune image scan severity thresholds and decide when scans should fail CI
 - Run the Alembic migration Job with the same immutable `log-service` image tag before app rollout
 - Stop deployment automatically if tests, image builds, scans, migrations, or rollout checks fail
 - Split runtime and development dependencies so Ruff and pytest are not installed in production images
