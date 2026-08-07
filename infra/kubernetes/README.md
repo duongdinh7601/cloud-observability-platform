@@ -29,7 +29,7 @@ infra/kubernetes/
 - `overlays/dev/` adapts the base for local Docker Desktop Kubernetes by using local image tags such as `frontend:k8s-dev` and `log-service:k8s-dev`, plus a local Ingress host.
 - `overlays/prod/` documents the production-intent image shape with GHCR-hosted release images. It is not ready to apply until real release tags and production secret handling are in place.
 
-The GitHub Actions `CI` workflow renders the dev and prod overlays with `kubectl kustomize` so broken Kustomize composition is caught before merge. It also builds the frontend and log-service Docker images as validation artifacts. These checks do not push images, deploy workloads, or prove runtime cluster health.
+The GitHub Actions `CI` workflow renders the dev and prod overlays with `kubectl kustomize` so broken Kustomize composition is caught before merge. It also builds the frontend and log-service Docker images as validation artifacts and scans them with Trivy in report-only mode. These checks do not push images, deploy workloads, enforce scan policy, or prove runtime cluster health.
 
 ## Secret Handling
 
@@ -330,7 +330,7 @@ Known follow-up areas:
 - Decide whether Postgres should be managed outside the cluster.
 - Add ingress or gateway routing for public traffic.
 - Run database migrations through a Kubernetes Job or CI/CD-controlled migration step before rolling out app pods.
-- Expand CI/CD automation beyond manifest rendering and image build validation to image scans, pushes, migrations, deployment, and rollout verification.
+- Expand CI/CD automation beyond manifest rendering, image build validation, and report-only image scans to enforced scan policy, pushes, migrations, deployment, and rollout verification.
 - Add namespaces, RBAC, NetworkPolicies, container hardening, TLS, and production ingress/cert management.
 - Replace the lightweight dev Prometheus/Grafana setup with production monitoring such as kube-prometheus-stack, Prometheus Operator, Grafana Operator, managed Prometheus, or managed Grafana.
 - Move local ConfigMap-embedded alert rules to Prometheus Operator `PrometheusRule` resources or managed alert rules.
