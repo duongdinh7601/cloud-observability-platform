@@ -345,12 +345,14 @@ Completed scope:
 - Added CI validation that builds backend and frontend Docker images
 - Image builds use local CI tags and do not push to a registry
 - Added report-only Trivy image scans for backend and frontend Docker images
+- Documented the current vulnerability baseline in [security.md](security.md)
 
 Remaining scope:
 
 - Frontend formatting with Prettier
 - Repo-level CI cleanup, including dependency caching and clearer job boundaries
 - Enforced container image scan policy
+- Vulnerability remediation based on the documented baseline
 - Push immutable images to GHCR
 - Apply migrations and roll out Kubernetes manifests
 - Verify rollout health

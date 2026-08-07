@@ -23,7 +23,7 @@ The current platform centers on a log ingestion service, a Next.js dashboard, an
 | `frontend/` | Next.js logs dashboard and frontend container image |
 | `services/log-service/` | FastAPI log ingestion and retrieval service |
 | `services/api-gateway/` | Placeholder for a future gateway service |
-| `docs/` | Architecture notes, service docs, and roadmap |
+| `docs/` | Architecture notes, service docs, security notes, and roadmap |
 | `infra/` | Infrastructure artifacts, including Kubernetes base manifests and overlays |
 | `scripts/` | Shared repo-level utility script area |
 
@@ -108,6 +108,7 @@ The current observability slice emits JSON request logs from `log-service`, skip
 - Move the local/dev Kubernetes migration Job into a CI-controlled rollout flow.
 - Replace placeholder production image tags with immutable release tags.
 - Expand CI/CD with frontend formatting, enforced image scan policy, registry push, migration execution, and rollout verification.
+- Track and reduce the current vulnerability baseline in [docs/security.md](docs/security.md).
 - Replace local Kubernetes Secrets with External Secrets Operator plus a cloud secret manager or Vault.
 - Decide on managed Postgres versus in-cluster Postgres for production.
 - Refine Grafana dashboards, then move alerting toward a production-ready notification path and eventually add distributed tracing.
