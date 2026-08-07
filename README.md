@@ -1,5 +1,7 @@
 # Cloud Observability Platform
 
+[![CI](https://github.com/duongdinh7601/cloud-observability-platform/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/duongdinh7601/cloud-observability-platform/actions/workflows/ci.yml)
+
 A full-stack observability platform built to demonstrate production-minded engineering across backend, frontend, and deployment workflows.
 
 The current platform centers on a log ingestion service, a Next.js dashboard, and a deployment model that can run through Docker Compose or local Kubernetes. The project is intentionally learning-first and production-shaped: simpler choices are used when they make concepts clear, then revisited as the platform matures.
